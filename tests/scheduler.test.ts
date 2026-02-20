@@ -22,8 +22,9 @@ function makeConfig(overrides: Record<string, unknown> = {}): AppConfig {
   });
 }
 
-// Wait for async cleanup (recording promises to settle after abort)
-function tick(ms = 100): Promise<void> {
+// Wait for async cleanup — recordings fire async executeJob which tries browser
+// connection. On CI (Linux), connection refusal can take longer than on Windows.
+function tick(ms = 2000): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -31,7 +32,6 @@ describe('Scheduler', () => {
   let config: AppConfig;
 
   beforeEach(async () => {
-    // Ensure clean state: stop any lingering recordings and wait for async cleanup
     stopAllRecordings();
     await tick();
     stopScheduler();
