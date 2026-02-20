@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && node -e \"const fs=require('fs');fs.cpSync('src/public','dist/public',{recursive:true})\"",
     "start": "node dist/index.js",
-    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test": "node --import tsx --test tests/config.test.ts tests/scheduler.test.ts tests/server.test.ts",
     "lint": "eslint src/ tests/"
   },
   "dependencies": {
