@@ -5,6 +5,7 @@ import path from 'node:path';
 import { AppConfig, JobConfig } from './config.js';
 import { getLaunchedBrowser, ensureBrowser, ensureConnectedBrowser } from './browser.js';
 import { RecordingError, PageNotFoundError } from './errors.js';
+import { getFfmpegPath } from './ffmpeg-path.js';
 
 export function makeTimestamp(): string {
   return new Date().toISOString().replace(/:/g, '');
@@ -13,7 +14,7 @@ export function makeTimestamp(): string {
 async function recordPage(page: Page, outputPath: string, durationSeconds: number, captureFps: number, signal?: AbortSignal): Promise<void> {
   const captureInterval = 1000 / captureFps;
 
-  const proc = spawn('ffmpeg', [
+  const proc = spawn(getFfmpegPath(), [
     '-f', 'mjpeg',
     '-framerate', captureFps.toString(),
     '-i', '-',

@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import { AppConfig } from './config.js';
+import { getFfmpegPath } from './ffmpeg-path.js';
 
 export interface PreflightResult {
   name: string;
@@ -32,7 +33,7 @@ function runCommand(command: string, args: string[]): Promise<{ code: number; st
 }
 
 async function checkFfmpeg(): Promise<PreflightResult> {
-  const result = await runCommand('ffmpeg', ['-version']);
+  const result = await runCommand(getFfmpegPath(), ['-version']);
   if (result.code === 0) {
     const version = result.stdout.split('\n')[0] ?? 'unknown';
     return { name: 'ffmpeg', status: 'pass', message: `ffmpeg found: ${version.trim()}` };

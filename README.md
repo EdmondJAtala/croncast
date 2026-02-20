@@ -98,13 +98,53 @@ The dashboard at `http://localhost:{port}` provides:
 - **Recordings** — Browse, play, and manage saved MP4 files
 - **Settings** — Configure browser connection, Chrome launcher, and app settings
 
+## Desktop App (Electron)
+
+croncast can also run as a native Windows desktop app via Electron. This bundles ffmpeg and provides auto-updates from GitHub Releases.
+
+### Running in dev
+
+```bash
+npm run start:electron
+```
+
+This builds both the main app and the Electron wrapper, then launches the desktop window.
+
+### Building an installer
+
+```bash
+npm run dist
+```
+
+Produces an NSIS installer in `release/`. The installer is Windows x64 only.
+
+### How it works
+
+- Electron's main process runs the same startup sequence as standalone mode (config, preflight, scheduler, Express server)
+- A frameless BrowserWindow loads the dashboard from `http://127.0.0.1:{port}`
+- Config is stored in `%APPDATA%/croncast/config.json` (copied from `config.default.json` on first run)
+- ffmpeg is bundled via `ffmpeg-static` — no PATH dependency when running the desktop app
+- Auto-updates are handled by `electron-updater` from GitHub Releases
+
+### Releasing
+
+Push a version tag to trigger the GitHub Actions release workflow:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This builds the installer on `windows-latest` and publishes it as a GitHub Release.
+
 ## Development
 
 ```bash
-npm run build       # Build TypeScript + copy static assets
-npm test            # Run all tests
-npm run lint        # Lint with ESLint
-npx tsc --noEmit    # Type check without emitting
+npm run build           # Build TypeScript + copy static assets
+npm run build:electron  # Build Electron TypeScript
+npm test                # Run all tests
+npm run lint            # Lint with ESLint
+npx tsc --noEmit        # Type check without emitting
 ```
 
 ## License

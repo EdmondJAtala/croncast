@@ -114,14 +114,73 @@
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 16px;
+      padding: 0 16px 24px;
     }
 
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 16px;
+    }
+
+    /* Electron frameless: header becomes the draggable titlebar */
+    body.electron-app header {
+      -webkit-app-region: drag;
+      border-bottom: 1px solid var(--color-border);
+      max-width: none;
+      padding: 8px 16px;
+    }
+
+    body.electron-app .container {
+      padding-top: 8px;
+    }
+
+    body.electron-app header button,
+    body.electron-app header .connection-badge {
+      -webkit-app-region: no-drag;
+    }
+
+    .window-controls {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+    }
+
+    body.electron-app .window-controls {
+      display: flex;
+    }
+
+    body.electron-app .header-actions {
+      gap: 6px;
+    }
+
+    .window-controls button {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 7px 9px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      line-height: 0;
+      transition: all 150ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .window-controls button:hover {
+      background: var(--color-row-hover);
+      color: var(--color-text);
+    }
+
+    .window-controls button.window-close:hover {
+      background: #e81123;
+      color: #fff;
+      border-color: #e81123;
     }
 
     .header-brand {
@@ -386,7 +445,7 @@
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
       padding: 24px;
-      min-width: 480px;
+      width: min(480px, calc(100vw - 32px));
       max-width: 640px;
       max-height: 80vh;
       overflow-y: auto;
@@ -438,11 +497,94 @@
       transition: border-color 150ms;
     }
 
+    .form-group select,
+    .sort-select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      padding-right: 36px;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.5 4L5 7L7.5 4' stroke='%236b7280' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+      cursor: pointer;
+    }
+
+    .form-group select:hover,
+    .sort-select:hover {
+      border-color: var(--color-text-secondary);
+    }
+
     .form-group input:focus,
     .form-group select:focus {
       border-color: var(--color-accent);
       box-shadow: 0 0 0 3px var(--color-focus-ring);
       outline: 2px solid transparent;
+    }
+
+    /* Custom number input spinners */
+    .form-group input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .form-group input[type="number"]::-webkit-inner-spin-button,
+    .form-group input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    .num-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .num-input-wrap input[type="number"] {
+      padding-right: 32px;
+    }
+
+    .num-input-wrap .num-spin {
+      position: absolute;
+      right: 1px;
+      display: flex;
+      flex-direction: column;
+      top: 1px;
+      bottom: 1px;
+      width: 24px;
+      border-left: 1px solid var(--color-border);
+      overflow: hidden;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .num-input-wrap .num-spin button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface);
+      border: none;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      padding: 0;
+      font-size: 10px;
+      line-height: 1;
+      transition: all 150ms;
+    }
+
+    .num-input-wrap .num-spin button:first-child {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .num-input-wrap .num-spin button:hover {
+      background: var(--color-row-hover);
+      color: var(--color-text);
+    }
+
+    .num-input-wrap .num-spin button:active {
+      background: var(--color-accent);
+      color: #fff;
     }
 
     .theme-toggle {
@@ -517,7 +659,7 @@
 
     .toast-container {
       position: fixed;
-      top: 16px;
+      bottom: 16px;
       right: 16px;
       z-index: 200;
       display: flex;
@@ -812,7 +954,14 @@
     }
 
     .dur-row .dur-field input {
+      width: 100%;
+      padding: 6px 28px 6px 10px;
+      font-size: 13px;
+    }
+
+    .dur-row .dur-field .num-input-wrap {
       width: 72px;
+      flex-shrink: 0;
     }
 
     .dur-row .dur-field .dur-label {
@@ -821,31 +970,23 @@
       font-weight: 500;
     }
 
-    .schedule-sub-fields {
-      margin-top: 8px;
+    .schedule-sentence {
+      margin-top: 10px;
       display: flex;
-      gap: 8px;
       align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .schedule-sub-fields label {
-      font-size: 12px;
+      gap: 6px;
+      font-size: 13px;
       color: var(--color-text-secondary);
-      margin-bottom: 0;
     }
 
-    .schedule-sub-fields select,
-    .schedule-sub-fields input {
+    .schedule-sentence .dur-field {
+      display: inline-flex;
+    }
+
+    .schedule-sentence select {
+      padding: 6px 10px;
+      font-size: 13px;
       width: auto;
-      min-width: 80px;
-    }
-
-    .schedule-preview {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--color-text-secondary);
-      font-style: italic;
     }
 
     .empty-state {
@@ -1167,9 +1308,6 @@
       }
 
       .modal {
-        min-width: unset !important;
-        width: calc(100vw - 32px);
-        max-width: calc(100vw - 32px);
         max-height: 90vh;
       }
 
@@ -1180,15 +1318,10 @@
         flex-wrap: wrap;
       }
 
-      .dur-row {
-        flex-wrap: wrap;
+      .dur-row .dur-field input {
+        width: 56px;
       }
 
-      .schedule-sub-fields {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-      }
 
       .form-actions {
         flex-wrap: wrap;
@@ -1214,6 +1347,10 @@
       }
     }
 
+    @media (max-width: 600px) {
+      .header-subtitle { display: none; }
+    }
+
     /* Responsive: Mobile */
     @media (max-width: 480px) {
       header h1 { font-size: 20px; }
@@ -1231,9 +1368,7 @@
       td { font-size: 12px; }
 
       .modal-wide {
-        min-width: unset;
-        width: calc(100vw - 32px);
-        max-width: calc(100vw - 32px);
+        width: min(640px, calc(100vw - 32px));
       }
 
       .modal-player {
@@ -1409,10 +1544,10 @@
     .sort-select {
       font-size: 12px;
       font-family: var(--font-sans);
-      padding: 3px 6px;
+      padding: 3px 24px 3px 6px;
       border: 1px solid var(--color-border);
       border-radius: var(--radius-sm);
-      background: var(--color-surface);
+      background-color: var(--color-surface);
       color: var(--color-text-secondary);
       cursor: pointer;
     }
@@ -1539,11 +1674,11 @@
     }
 
     .modal-wide {
-      min-width: 640px;
+      width: min(640px, calc(100vw - 32px));
     }
 
     .modal-settings {
-      min-width: 640px;
+      width: min(640px, calc(100vw - 32px));
       max-width: 720px;
     }
 
@@ -1614,20 +1749,25 @@
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
+  <header>
+    <div class="header-brand">
+      <h1>croncast</h1>
+      <span class="header-subtitle">scheduled recordings</span>
+    </div>
+    <div class="header-actions">
+      <div class="connection-badge connecting" id="connectionBadge" aria-live="polite" onclick="showStatusModal()" title="Click for system status">
+        <div class="status-dot" id="statusDot" aria-hidden="true"></div>
+        <span id="statusText">connecting</span>
+      </div>
+      <button class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings" onclick="showSettingsModal()">&#9881;</button>
+      <div class="window-controls" id="windowControls">
+        <button onclick="window.croncast.windowMinimize()" title="Minimize" aria-label="Minimize"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="1" rx="0.5" fill="currentColor"/></svg></button>
+        <button onclick="window.croncast.windowMaximize()" title="Maximize" aria-label="Maximize"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1" fill="none"/></svg></button>
+        <button class="window-close" onclick="window.croncast.windowClose()" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+  </header>
   <div class="container">
-    <header>
-      <div class="header-brand">
-        <h1>croncast</h1>
-        <span class="header-subtitle">scheduled recordings</span>
-      </div>
-      <div class="header-actions">
-        <div class="connection-badge connecting" id="connectionBadge" aria-live="polite" onclick="showStatusModal()" title="Click for system status">
-          <div class="status-dot" id="statusDot" aria-hidden="true"></div>
-          <span id="statusText">connecting</span>
-        </div>
-        <button class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings" onclick="showSettingsModal()">&#9881;</button>
-      </div>
-    </header>
 
     <nav class="section-nav" id="sectionNav" role="tablist" aria-label="Dashboard sections">
       <button class="active" data-section="jobs" role="tab" aria-selected="true" aria-controls="section-jobs" id="tab-jobs" tabindex="0">Jobs</button>
@@ -1687,6 +1827,11 @@
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
   <script>
+    // Enable Electron frameless titlebar mode
+    if (window.croncast) {
+      document.body.classList.add('electron-app');
+    }
+
     // Theme
     function getTheme() {
       return localStorage.getItem('croncast-theme') || 'dark';
@@ -1885,6 +2030,34 @@
     }
 
     // Toast
+    // Enhance number inputs with custom spin buttons
+    function enhanceNumberInputs(root = document) {
+      root.querySelectorAll('.form-group input[type="number"]').forEach(input => {
+        if (input.parentElement.classList.contains('num-input-wrap')) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'num-input-wrap';
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+        const spin = document.createElement('div');
+        spin.className = 'num-spin';
+        const up = document.createElement('button');
+        up.type = 'button';
+        up.tabIndex = -1;
+        up.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 6.5L5 3.5L7 6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        up.onclick = () => { input.stepUp(); input.dispatchEvent(new Event('input', {bubbles:true})); };
+        const down = document.createElement('button');
+        down.type = 'button';
+        down.tabIndex = -1;
+        down.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M3 3.5L5 6.5L7 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        down.onclick = () => { input.stepDown(); input.dispatchEvent(new Event('input', {bubbles:true})); };
+        spin.appendChild(up);
+        spin.appendChild(down);
+        wrap.appendChild(spin);
+      });
+    }
+    // Auto-enhance number inputs in dynamically rendered modals
+    new MutationObserver(() => enhanceNumberInputs()).observe(document.body, { childList: true, subtree: true });
+
     function toast(message, type = 'info') {
       const el = document.createElement('div');
       el.className = `toast toast-${type}`;
@@ -2495,40 +2668,7 @@
       }
     }
 
-    function getSchedulePreview() {
-      const mode = document.getElementById('jobScheduleMode').value;
-      switch (mode) {
-        case 'manual':
-          return 'Runs: Manual trigger only';
-        case 'everyMin': {
-          const n = parseInt(document.getElementById('jobSchedEveryMin')?.value, 10) || 5;
-          return `Runs: Every ${n} minute${n === 1 ? '' : 's'}`;
-        }
-        case 'everyHr': {
-          const n = parseInt(document.getElementById('jobSchedEveryHr')?.value, 10) || 1;
-          const m = document.getElementById('jobSchedMinute')?.value || '0';
-          const label = n === 1 ? 'Every hour' : `Every ${n} hours`;
-          return `Runs: ${label} at :${String(m).padStart(2, '0')}`;
-        }
-        case 'daily': {
-          const m = document.getElementById('jobSchedMinute').value;
-          const h = document.getElementById('jobSchedHour').value;
-          return `Runs: Every day at ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        }
-        case 'weekly': {
-          const m = document.getElementById('jobSchedMinute').value;
-          const h = document.getElementById('jobSchedHour').value;
-          const d = document.getElementById('jobSchedDay').value;
-          const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-          return `Runs: Every ${days[d]} at ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        }
-        case 'custom': {
-          const v = document.getElementById('jobSchedCustom')?.value.trim();
-          return v ? `Runs: Custom (${v})` : 'Runs: —';
-        }
-        default: return '';
-      }
-    }
+
 
     function updateScheduleUI() {
       const mode = document.getElementById('jobScheduleMode').value;
@@ -2536,50 +2676,44 @@
       let html = '';
 
       if (mode === 'everyMin') {
-        html += '<label>Every</label>';
-        html += '<input type="number" id="jobSchedEveryMin" min="1" max="59" value="5" style="width:72px" oninput="updateSchedulePreview()">';
-        html += '<label>minutes</label>';
+        html += '<div class="schedule-sentence">';
+        html += 'every';
+        html += '<div class="dur-field"><input type="number" id="jobSchedEveryMin" min="1" max="59" value="5"></div>';
+        html += 'minutes';
+        html += '</div>';
       } else if (mode === 'everyHr') {
-        html += '<label>Every</label>';
-        html += '<input type="number" id="jobSchedEveryHr" min="1" max="23" value="1" style="width:72px" oninput="updateSchedulePreview()">';
-        html += '<label>hours, at minute</label>';
-        html += '<select id="jobSchedMinute" onchange="updateSchedulePreview()">';
-        for (let i = 0; i < 60; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
-        html += '</select>';
+        html += '<div class="schedule-sentence">';
+        html += 'every';
+        html += '<div class="dur-field"><input type="number" id="jobSchedEveryHr" min="1" max="23" value="1"></div>';
+        html += 'hours at minute';
+        html += '<div class="dur-field"><input type="number" id="jobSchedMinute" min="0" max="59" value="0"></div>';
+        html += '</div>';
       } else if (mode === 'daily') {
-        html += '<label>Hour</label>';
-        html += '<select id="jobSchedHour" onchange="updateSchedulePreview()">';
-        for (let i = 0; i < 24; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
-        html += '</select>';
-        html += '<label>Minute</label>';
-        html += '<select id="jobSchedMinute" onchange="updateSchedulePreview()">';
-        for (let i = 0; i < 60; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
-        html += '</select>';
+        html += '<div class="schedule-sentence">';
+        html += 'every day at';
+        html += '<div class="dur-field"><input type="number" id="jobSchedHour" min="0" max="23" value="9"></div>';
+        html += ':';
+        html += '<div class="dur-field"><input type="number" id="jobSchedMinute" min="0" max="59" value="0"></div>';
+        html += '</div>';
       } else if (mode === 'weekly') {
-        html += '<label>Day</label>';
-        html += '<select id="jobSchedDay" onchange="updateSchedulePreview()">';
+        html += '<div class="schedule-sentence">';
+        html += 'every';
+        html += '<select id="jobSchedDay">';
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         for (let i = 0; i < 7; i++) html += `<option value="${i}">${days[i]}</option>`;
         html += '</select>';
-        html += '<label>Hour</label>';
-        html += '<select id="jobSchedHour" onchange="updateSchedulePreview()">';
-        for (let i = 0; i < 24; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
-        html += '</select>';
-        html += '<label>Minute</label>';
-        html += '<select id="jobSchedMinute" onchange="updateSchedulePreview()">';
-        for (let i = 0; i < 60; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
-        html += '</select>';
+        html += 'at';
+        html += '<div class="dur-field"><input type="number" id="jobSchedHour" min="0" max="23" value="9"></div>';
+        html += ':';
+        html += '<div class="dur-field"><input type="number" id="jobSchedMinute" min="0" max="59" value="0"></div>';
+        html += '</div>';
       } else if (mode === 'custom') {
-        html += '<input type="text" id="jobSchedCustom" class="mono-input" placeholder="0 9 * * *" style="min-width:160px" oninput="updateSchedulePreview()">';
+        html += '<div class="schedule-sentence">';
+        html += '<input type="text" id="jobSchedCustom" class="mono-input" placeholder="0 9 * * *" style="min-width:160px">';
+        html += '</div>';
       }
 
       subEl.innerHTML = html;
-      updateSchedulePreview();
-    }
-
-    function updateSchedulePreview() {
-      const el = document.getElementById('schedulePreview');
-      if (el) el.textContent = getSchedulePreview();
     }
 
     function applyParsedSchedule(parsed) {
@@ -2603,7 +2737,6 @@
         document.getElementById('jobSchedCustom').value = parsed.raw;
       }
 
-      updateSchedulePreview();
     }
 
     // Job modal
@@ -2639,8 +2772,7 @@
       html += '<option value="weekly">Weekly</option>';
       html += '<option value="custom">Custom cron</option>';
       html += '</select>';
-      html += '<div class="schedule-sub-fields" id="scheduleSubFields"></div>';
-      html += '<div class="schedule-preview" id="schedulePreview"></div>';
+      html += '<div id="scheduleSubFields"></div>';
       html += '<div class="form-hint">Times are in server timezone (' + escapeHtml((statusData?.timezone || 'local').replace(/_/g, ' ')) + ')</div>';
       html += '</div>';
 
@@ -2796,8 +2928,8 @@
         const newConfig = JSON.parse(JSON.stringify(currentConfig));
         newConfig.jobs.splice(index, 1);
         if (newConfig.jobs.length === 0) {
-          toast('Cannot delete the last job', 'error');
-          throw new Error('Cannot delete last job');
+          toast('At least one job is required — edit this job instead of deleting it', 'error');
+          return;
         }
         await api('PUT', '/api/config', newConfig);
         currentConfig = newConfig;

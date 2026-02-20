@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "description": "Automated browser tab video recording on a cron schedule",
   "type": "module",
+  "main": "dist-electron/main.js",
   "scripts": {
     "build": "tsc && node -e \"const fs=require('fs');fs.cpSync('src/public','dist/public',{recursive:true})\"",
+    "build:electron": "tsc -p tsconfig.electron.json",
     "start": "node dist/index.js",
+    "start:electron": "npm run build && npm run build:electron && electron .",
+    "dist": "npm run build && npm run build:electron && electron-builder --win",
     "test": "node --import tsx --test tests/config.test.ts tests/scheduler.test.ts tests/server.test.ts",
     "lint": "eslint src/ tests/"
   },
   "dependencies": {
     "croner": "^10.0.1",
+    "electron-updater": "^6.8.3",
     "express": "^4.21.2",
+    "ffmpeg-static": "^5.3.0",
     "puppeteer-core": "^24.2.1"
   },
   "devDependencies": {
@@ -20,9 +26,47 @@
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
+    "electron": "^40.6.0",
+    "electron-builder": "^26.8.1",
     "eslint": "^10.0.1",
     "supertest": "^7.2.2",
     "tsx": "^4.19.0",
     "typescript": "^5.7.3"
+  },
+  "build": {
+    "appId": "com.croncast.app",
+    "productName": "croncast",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "electron/preload.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "config.default.json",
+        "to": "config.default.json"
+      },
+      {
+        "from": "node_modules/ffmpeg-static/ffmpeg.exe",
+        "to": "ffmpeg.exe"
+      }
+    ],
+    "asar": false,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    },
+    "publish": {
+      "provider": "github"
+    }
   }
 }

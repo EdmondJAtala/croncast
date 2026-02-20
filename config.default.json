@@ -6,7 +6,6 @@
     {
       "name": "Example Recording",
       "urlPattern": "example.com",
-      "schedule": "0 10 * * *",
       "durationSeconds": 60,
       "captureFps": 2
     }
