@@ -1,0 +1,28 @@
+{
+  "name": "croncast",
+  "version": "1.0.0",
+  "description": "Automated browser tab video recording on a cron schedule",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node -e \"const fs=require('fs');fs.cpSync('src/public','dist/public',{recursive:true})\"",
+    "start": "node dist/index.js",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "lint": "eslint src/ tests/"
+  },
+  "dependencies": {
+    "croner": "^10.0.1",
+    "express": "^4.21.2",
+    "puppeteer-core": "^24.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "eslint": "^10.0.1",
+    "supertest": "^7.2.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.3"
+  }
+}

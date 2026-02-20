@@ -1,0 +1,14 @@
+{
+  "outputDir": "./recordings",
+  "port": 3000,
+  "browserURL": "http://localhost:9222",
+  "jobs": [
+    {
+      "name": "Example Recording",
+      "urlPattern": "example.com",
+      "schedule": "0 10 * * *",
+      "durationSeconds": 60,
+      "captureFps": 2
+    }
+  ]
+}

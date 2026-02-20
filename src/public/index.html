@@ -1,0 +1,3545 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="croncast - Scheduled browser recording dashboard">
+  <meta name="theme-color" content="#0c0e14">
+  <title>croncast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <style>
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 8px;
+      --radius-sm: 6px;
+    }
+
+    [data-theme="light"] {
+      --color-bg: #f8f9fa;
+      --color-surface: #ffffff;
+      --color-border: #e2e8f0;
+      --color-text: #1a202c;
+      --color-text-secondary: #64748b;
+      --color-accent: #0e7490;
+      --color-accent-hover: #0c6377;
+      --color-success: #22c55e;
+      --color-success-bg: #f0fdf4;
+      --color-success-text: #15803d;
+      --color-warn: #f59e0b;
+      --color-warn-bg: #fffbeb;
+      --color-warn-text: #b45309;
+      --color-error: #ef4444;
+      --color-error-bg: #fef2f2;
+      --color-error-text: #dc2626;
+      --color-row-hover: #f1f5f9;
+      --color-pill-idle-bg: #f1f5f9;
+      --color-code-bg: #f1f5f9;
+      --color-modal-backdrop: rgba(0, 0, 0, 0.4);
+      --color-toast-shadow: rgba(0, 0, 0, 0.1);
+      --color-card-shadow: rgba(0, 0, 0, 0.04);
+      --color-focus-ring: rgba(14, 116, 144, 0.25);
+    }
+
+    [data-theme="dark"] {
+      --color-bg: #0c0e14;
+      --color-surface: #1a1d27;
+      --color-border: #2d3348;
+      --color-text: #e2e8f0;
+      --color-text-secondary: #8b95a8;
+      --color-accent: #0891b2;
+      --color-accent-hover: #06b6d4;
+      --color-success: #34d399;
+      --color-success-bg: #0d2818;
+      --color-success-text: #6ee7b7;
+      --color-warn: #fbbf24;
+      --color-warn-bg: #2a1f05;
+      --color-warn-text: #fcd34d;
+      --color-error: #f87171;
+      --color-error-bg: #2a0f0f;
+      --color-error-text: #fca5a5;
+      --color-row-hover: #1f2335;
+      --color-pill-idle-bg: #252a3a;
+      --color-code-bg: #252a3a;
+      --color-modal-backdrop: rgba(0, 0, 0, 0.6);
+      --color-toast-shadow: rgba(0, 0, 0, 0.3);
+      --color-card-shadow: rgba(0, 0, 0, 0.2);
+      --color-focus-ring: rgba(8, 145, 178, 0.35);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-text-secondary);
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    html {
+      scrollbar-color: var(--color-border) transparent;
+      scrollbar-width: thin;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .connection-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--color-success-bg);
+      color: var(--color-success-text);
+      border: 1px solid transparent;
+      transition: all 300ms;
+      cursor: pointer;
+    }
+
+    .status-modal-footer {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .connection-badge.error {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+    }
+
+    .connection-badge.connecting {
+      background: var(--color-warn-bg);
+      color: var(--color-warn-text);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--color-success);
+      flex-shrink: 0;
+    }
+
+    .connection-badge.error .status-dot {
+      background: var(--color-error);
+    }
+
+    .connection-badge.connecting .status-dot {
+      background: var(--color-warn);
+      animation: pulse 1.5s infinite;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px var(--color-card-shadow), 0 1px 2px var(--color-card-shadow);
+      transition: box-shadow 200ms;
+    }
+
+    .card:hover {
+      box-shadow: 0 2px 8px var(--color-card-shadow), 0 1px 3px var(--color-card-shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--color-row-hover);
+      transition: background 100ms;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 150ms;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--color-accent);
+      color: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-accent-hover);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+      border-color: var(--color-border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--color-row-hover);
+      color: var(--color-text);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--color-error);
+      border-color: var(--color-border);
+    }
+
+    .btn-danger:hover {
+      background: var(--color-error-bg);
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .pill-success {
+      background: var(--color-success-bg);
+      color: var(--color-success-text);
+    }
+
+    .pill-warn {
+      background: var(--color-warn-bg);
+      color: var(--color-warn-text);
+    }
+
+    .pill-error {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+    }
+
+    .pill-idle {
+      background: var(--color-pill-idle-bg);
+      color: var(--color-text-secondary);
+    }
+
+    .pill-countdown {
+      background: var(--color-pill-idle-bg);
+      color: var(--color-accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pill-recording {
+      background: var(--color-success-bg);
+      color: var(--color-success-text);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-success);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--color-modal-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 150ms;
+    }
+
+    .modal {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      min-width: 480px;
+      max-width: 640px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 200ms;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      background: var(--color-surface);
+      color: var(--color-text);
+      outline: none;
+      transition: border-color 150ms;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
+      outline: 2px solid transparent;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      font-size: 16px;
+      line-height: 1;
+      transition: all 150ms;
+    }
+
+    .theme-toggle:hover {
+      background: var(--color-row-hover);
+      color: var(--color-text);
+    }
+
+    .settings-btn {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      font-size: 16px;
+      line-height: 1;
+      transition: all 150ms;
+    }
+
+    .settings-btn:hover {
+      background: var(--color-row-hover);
+      color: var(--color-text);
+    }
+
+    .pill-clickable {
+      cursor: pointer;
+      transition: opacity 150ms;
+    }
+
+    .pill-clickable:hover {
+      opacity: 0.8;
+    }
+
+    .error-detail {
+      background: var(--color-code-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      color: var(--color-error-text);
+    }
+
+    .form-group input.mono-input {
+      font-family: var(--font-mono);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      animation: toastIn 200ms;
+      box-shadow: 0 4px 12px var(--color-toast-shadow);
+    }
+
+    .toast-success {
+      background: var(--color-success);
+      color: white;
+    }
+
+    .toast-error {
+      background: var(--color-error);
+      color: white;
+    }
+
+    .toast-info {
+      background: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .toast.removing {
+      animation: toastOut 200ms forwards;
+    }
+
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toastOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    .check-list {
+      list-style: none;
+    }
+
+    .check-list li {
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .check-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      width: 20px;
+      text-align: center;
+    }
+
+    .check-icon.pass { color: var(--color-success); }
+    .check-icon.warn { color: var(--color-warn); }
+    .check-icon.fail { color: var(--color-error); }
+
+    .check-detail {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    .check-detail code {
+      background: var(--color-code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .test-screenshot {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      margin-top: 12px;
+      cursor: pointer;
+      transition: max-height 300ms ease, box-shadow 200ms ease;
+    }
+
+    .test-screenshot:hover {
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .test-screenshot.expanded {
+      max-height: 80vh;
+    }
+
+    /* Test modal */
+    .modal-test {
+      min-width: 480px;
+      max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .test-header {
+      margin-bottom: 16px;
+    }
+
+    .test-header h3 {
+      border-bottom: none;
+      margin-bottom: 4px;
+      padding-bottom: 0;
+    }
+
+    .test-header .test-meta {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-family: var(--font-mono);
+      word-break: break-all;
+    }
+
+    .test-header .test-meta span {
+      display: inline-block;
+      margin-right: 12px;
+    }
+
+    .test-progress {
+      text-align: center;
+      padding: 32px 16px;
+    }
+
+    .test-progress .spinner {
+      width: 20px;
+      height: 20px;
+      border-width: 2.5px;
+    }
+
+    .test-progress .test-progress-text {
+      display: block;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      animation: testPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes testPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .test-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .test-summary.pass {
+      background: var(--color-success-bg);
+      color: var(--color-success-text);
+    }
+
+    .test-summary.fail {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+    }
+
+    .test-summary .test-elapsed {
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    .test-error-box {
+      background: var(--color-error-bg);
+      color: var(--color-error-text);
+      border: 1px solid var(--color-error);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .test-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .test-actions .test-actions-spacer {
+      flex: 1;
+    }
+
+    @keyframes testStepIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .test-step-anim {
+      animation: testStepIn 250ms ease forwards;
+      opacity: 0;
+    }
+
+    .help-box {
+      background: var(--color-pill-idle-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--color-text-secondary);
+    }
+
+    .help-box summary {
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--color-text);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .help-box summary:hover {
+      color: var(--color-accent);
+    }
+
+    .help-box .help-content {
+      margin-top: 12px;
+    }
+
+    .help-box p {
+      margin: 8px 0;
+    }
+
+    .help-box code {
+      background: var(--color-code-bg);
+      border: 1px solid var(--color-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .help-box pre {
+      background: var(--color-code-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin: 8px 0;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      word-break: keep-all;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--color-text);
+    }
+
+    .help-box ol, .help-box ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+
+    .help-box li {
+      margin: 4px 0;
+    }
+
+    .dur-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dur-row .dur-field {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dur-row .dur-field input {
+      width: 72px;
+    }
+
+    .dur-row .dur-field .dur-label {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .schedule-sub-fields {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .schedule-sub-fields label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-bottom: 0;
+    }
+
+    .schedule-sub-fields select,
+    .schedule-sub-fields input {
+      width: auto;
+      min-width: 80px;
+    }
+
+    .schedule-preview {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      font-style: italic;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--color-text-secondary);
+      font-size: 14px;
+    }
+
+    .empty-state-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+      line-height: 1;
+    }
+
+    .empty-state-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+
+    .empty-state-hint {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--color-pill-idle-bg);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--color-success);
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
+
+    /* Video player modal */
+    .modal-player {
+      width: calc(100vw - 64px);
+      max-width: 1200px;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 12px;
+      min-width: 0;
+    }
+
+    .player-header .player-filename {
+      flex: 1 1 auto;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .player-header .player-nav {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .video-container {
+      flex: 1 1 auto;
+      background: #000;
+      border-radius: var(--radius-sm);
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .video-container video {
+      width: 100%;
+      height: 100%;
+      max-height: calc(95vh - 220px);
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+    }
+
+    .video-error {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--color-error-text);
+      font-size: 14px;
+      border-radius: var(--radius-sm);
+      z-index: 2;
+    }
+
+    .video-error-icon {
+      font-size: 32px;
+      opacity: 0.7;
+    }
+
+    .speed-group {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+
+    .speed-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: none;
+      border-right: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .speed-btn:last-child {
+      border-right: none;
+    }
+
+    .speed-btn:hover {
+      background: var(--color-row-hover);
+      color: var(--color-text);
+    }
+
+    .speed-btn.active {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .player-info {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .player-actions {
+      display: flex;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .player-actions .btn:last-child {
+      margin-left: auto;
+    }
+
+    .player-shortcuts-hint {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      margin-top: 10px;
+      opacity: 0.7;
+    }
+
+    .player-shortcuts-hint kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--color-code-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+      line-height: 1.4;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 600ms linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .section-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .section-nav button {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 150ms;
+      margin-bottom: -1px;
+    }
+
+    .section-nav button.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .section-nav button:hover:not(.active) {
+      color: var(--color-text);
+      background: var(--color-row-hover);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+      animation: sectionIn 200ms ease-out;
+    }
+
+    @keyframes sectionIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .text-truncate {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .text-truncate-target {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .form-hint {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--color-text-secondary);
+    }
+
+    /* Responsive: Tablet */
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px 12px;
+      }
+
+      header {
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .section-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        margin-bottom: 16px;
+      }
+      .section-nav::-webkit-scrollbar { display: none; }
+
+      .section-nav button {
+        white-space: nowrap;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .card {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .modal {
+        min-width: unset !important;
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+        max-height: 90vh;
+      }
+
+      table { font-size: 13px; }
+      th, td { padding: 8px 8px; }
+
+      .btn-group {
+        flex-wrap: wrap;
+      }
+
+      .dur-row {
+        flex-wrap: wrap;
+      }
+
+      .schedule-sub-fields {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .form-actions {
+        flex-wrap: wrap;
+      }
+
+      .modal-player {
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+        padding: 12px;
+      }
+
+      .player-shortcuts-hint {
+        display: none;
+      }
+
+      .section-page-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .job-card-footer {
+        flex-wrap: wrap;
+      }
+    }
+
+    /* Responsive: Mobile */
+    @media (max-width: 480px) {
+      header h1 { font-size: 20px; }
+
+      .card { padding: 12px; }
+
+      .card-header h2 { font-size: 16px; }
+
+      .btn-sm {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+
+      th { font-size: 11px; }
+      td { font-size: 12px; }
+
+      .modal-wide {
+        min-width: unset;
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+      }
+
+      .modal-player {
+        padding: 8px;
+      }
+
+      .player-header {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+      }
+
+      .player-header .player-filename {
+        font-size: 12px;
+      }
+
+      .player-info {
+        gap: 10px;
+        font-size: 11px;
+      }
+
+      .player-actions {
+        flex-wrap: wrap;
+      }
+
+      .player-shortcuts-hint {
+        display: none;
+      }
+
+      .settings-inline-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .job-card-header {
+        flex-wrap: wrap;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-footer {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .status-footer-spacer {
+      margin-left: 16px;
+    }
+
+    .settings-heading {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--color-text);
+    }
+
+    .settings-subheading {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--color-text);
+    }
+
+    .settings-divider {
+      border: none;
+      border-top: 1px solid var(--color-border);
+      margin: 20px 0;
+    }
+
+    .settings-divider-sm {
+      border: none;
+      border-top: 1px solid var(--color-border);
+      margin: 16px 0;
+    }
+
+    .settings-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .settings-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .settings-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .settings-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--color-pill-idle-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .settings-card-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .settings-card-header p {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin: 2px 0 0 0;
+    }
+
+    .settings-inline-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .settings-inline-row .form-group {
+      flex: 1;
+    }
+
+    .settings-save-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Jobs page */
+    .section-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-page-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .section-page-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-right: 4px;
+    }
+
+    .sort-select {
+      font-size: 12px;
+      font-family: var(--font-sans);
+      padding: 3px 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .job-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .job-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px var(--color-card-shadow), 0 1px 2px var(--color-card-shadow);
+      transition: box-shadow 200ms;
+    }
+
+    .job-card:hover {
+      box-shadow: 0 2px 8px var(--color-card-shadow), 0 1px 3px var(--color-card-shadow);
+    }
+
+    .job-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 0 14px;
+      gap: 10px;
+    }
+
+    .job-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .job-card-row {
+      display: flex;
+      align-items: center;
+      padding: 6px 14px 10px 14px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .job-card-row:first-child {
+      padding-top: 10px;
+    }
+
+    .job-card-body {
+      padding: 6px 14px 10px 14px;
+    }
+
+    .job-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+    }
+
+    .job-card-meta-item {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .job-card-meta-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: 0;
+    }
+
+    .job-card-meta-value {
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .job-card-meta-value.mono {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .job-card-footer {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg);
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+
+    .job-card--skeleton {
+      height: 72px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .job-card--skeleton::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, var(--color-border) 50%, transparent 100%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s ease-in-out infinite;
+    }
+
+    @keyframes skeletonShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .empty-state-action {
+      margin-top: 16px;
+    }
+
+    .job-card-progress {
+      margin-top: 8px;
+    }
+
+    .modal-wide {
+      min-width: 640px;
+    }
+
+    .modal-settings {
+      min-width: 640px;
+      max-width: 720px;
+    }
+
+    .settings-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .settings-modal-header h3 {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .settings-modal-theme {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .settings-modal-theme span {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .debug-chrome-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 16px;
+      z-index: 300;
+      padding: 8px 16px;
+      background: var(--color-accent);
+      color: white;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .skip-link:focus {
+      top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <div class="container">
+    <header>
+      <div class="header-brand">
+        <h1>croncast</h1>
+        <span class="header-subtitle">scheduled recordings</span>
+      </div>
+      <div class="header-actions">
+        <div class="connection-badge connecting" id="connectionBadge" aria-live="polite" onclick="showStatusModal()" title="Click for system status">
+          <div class="status-dot" id="statusDot" aria-hidden="true"></div>
+          <span id="statusText">connecting</span>
+        </div>
+        <button class="settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings" onclick="showSettingsModal()">&#9881;</button>
+      </div>
+    </header>
+
+    <nav class="section-nav" id="sectionNav" role="tablist" aria-label="Dashboard sections">
+      <button class="active" data-section="jobs" role="tab" aria-selected="true" aria-controls="section-jobs" id="tab-jobs" tabindex="0">Jobs</button>
+      <button data-section="active" role="tab" aria-selected="false" aria-controls="section-active" id="tab-active" tabindex="-1">Active</button>
+      <button data-section="recordings" role="tab" aria-selected="false" aria-controls="section-recordings" id="tab-recordings" tabindex="-1">Recordings</button>
+    </nav>
+
+    <main id="main-content">
+    <div class="section active" id="section-jobs" role="tabpanel" aria-labelledby="tab-jobs">
+      <div class="section-page-header">
+        <h2>Scheduled Jobs</h2>
+        <div class="section-page-actions">
+          <span id="jobSortBar"></span>
+          <button class="btn btn-primary btn-sm" onclick="showJobModal()">Add Job</button>
+        </div>
+      </div>
+      <div id="jobsTable">
+        <div class="job-card job-card--skeleton"></div>
+        <div class="job-card job-card--skeleton"></div>
+        <div class="job-card job-card--skeleton"></div>
+      </div>
+    </div>
+
+    <div class="section" id="section-active" role="tabpanel" aria-labelledby="tab-active">
+      <div class="section-page-header">
+        <h2>Active Recordings</h2>
+        <button class="btn btn-danger btn-sm" id="stopAllBtn" onclick="handleStopAll()" style="display:none">Stop All</button>
+      </div>
+      <div id="activeRecordingsTable">
+        <div class="job-card job-card--skeleton"></div>
+        <div class="job-card job-card--skeleton"></div>
+      </div>
+      <div class="section-page-header" style="margin-top:24px">
+        <h2>Recently Completed</h2>
+      </div>
+      <div id="completedRecordingsTable">
+        <div class="job-card job-card--skeleton"></div>
+        <div class="job-card job-card--skeleton"></div>
+      </div>
+    </div>
+
+    <div class="section" id="section-recordings" role="tabpanel" aria-labelledby="tab-recordings">
+      <div class="section-page-header">
+        <h2>Recordings</h2>
+        <span id="recSortBar"></span>
+      </div>
+      <div id="recordingsTable">
+        <div class="job-card job-card--skeleton"></div>
+        <div class="job-card job-card--skeleton"></div>
+        <div class="job-card job-card--skeleton"></div>
+      </div>
+    </div>
+
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // Theme
+    function getTheme() {
+      return localStorage.getItem('croncast-theme') || 'dark';
+    }
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.textContent = theme === 'dark' ? '\u2600' : '\u263E';
+      });
+    }
+    function toggleTheme() {
+      const next = getTheme() === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('croncast-theme', next);
+      applyTheme(next);
+    }
+    applyTheme(getTheme());
+
+    // Modal backdrop click — only close if both mousedown and mouseup were on the backdrop
+    let _backdropMouseDownTarget = null;
+    document.addEventListener('mousedown', (e) => { _backdropMouseDownTarget = e.target; });
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains('modal-backdrop')
+          && _backdropMouseDownTarget === e.target) {
+        closeModal(e.target);
+      }
+      _backdropMouseDownTarget = null;
+    });
+
+    // Modal focus management
+    let _lastFocusBeforeModal = null;
+
+    function openModal(html) {
+      _lastFocusBeforeModal = document.activeElement;
+      document.body.insertAdjacentHTML('beforeend', html);
+      const backdrop = document.body.lastElementChild;
+      const modal = backdrop.querySelector('.modal');
+      if (modal) {
+        const focusable = modal.querySelector('input:not([type="hidden"]), button, select, textarea, [tabindex="0"]');
+        if (focusable) focusable.focus();
+      }
+    }
+
+    function closeModal(el) {
+      const backdrop = el && el.classList && el.classList.contains('modal-backdrop')
+        ? el
+        : el ? el.closest('.modal-backdrop') : document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+      if (_lastFocusBeforeModal) {
+        _lastFocusBeforeModal.focus();
+        _lastFocusBeforeModal = null;
+      }
+    }
+
+    // Shared viewport helpers (used by both job modal and settings)
+    const RATIO_DEFAULTS = { '16:9': 1920, '4:3': 1024, '1:1': 1080, '21:9': 2560 };
+
+    function detectAspectRatio(w, h) {
+      if (!w || !h) return 'none';
+      for (const [ratio] of Object.entries(RATIO_DEFAULTS)) {
+        if (calcHeight(ratio, w) === h) return ratio;
+      }
+      return 'custom';
+    }
+
+    function calcHeight(ratio, width) {
+      const [rw, rh] = ratio.split(':').map(Number);
+      return Math.round(width * rh / rw);
+    }
+
+    function updateViewportForIds(ids) {
+      const ratio = document.getElementById(ids.aspectRatio).value;
+      const fieldsEl = document.getElementById(ids.fields);
+      const heightInput = document.getElementById(ids.height);
+      const widthInput = document.getElementById(ids.width);
+      const previewEl = document.getElementById(ids.preview);
+
+      if (ratio === 'none') {
+        fieldsEl.style.display = 'none';
+        return;
+      }
+
+      fieldsEl.style.display = 'block';
+
+      if (ratio === 'custom') {
+        heightInput.readOnly = false;
+        heightInput.style.opacity = '1';
+        document.getElementById(ids.heightLabel).textContent = '';
+      } else {
+        const sel = document.getElementById(ids.aspectRatio);
+        const currentWidth = parseInt(widthInput.value, 10);
+        if (!currentWidth || currentWidth === RATIO_DEFAULTS[sel._prevRatio]) {
+          widthInput.value = RATIO_DEFAULTS[ratio];
+        }
+        sel._prevRatio = ratio;
+
+        const w = parseInt(widthInput.value, 10) || RATIO_DEFAULTS[ratio];
+        const h = calcHeight(ratio, w);
+        heightInput.value = h;
+        heightInput.readOnly = true;
+        heightInput.style.opacity = '0.6';
+        document.getElementById(ids.heightLabel).textContent = '(auto-calculated)';
+      }
+
+      const w = parseInt(widthInput.value, 10);
+      const h = parseInt(heightInput.value, 10);
+      if (w && h) {
+        previewEl.textContent = `Viewport: ${w} \u00d7 ${h} px`;
+      } else {
+        previewEl.textContent = '';
+      }
+    }
+
+    function onViewportWidthChangeForIds(ids) {
+      const ratio = document.getElementById(ids.aspectRatio).value;
+      if (ratio !== 'none' && ratio !== 'custom') {
+        const w = parseInt(document.getElementById(ids.width).value, 10);
+        if (w > 0) {
+          document.getElementById(ids.height).value = calcHeight(ratio, w);
+        }
+      }
+      const w = parseInt(document.getElementById(ids.width).value, 10);
+      const h = parseInt(document.getElementById(ids.height).value, 10);
+      const previewEl = document.getElementById(ids.preview);
+      if (w && h) {
+        previewEl.textContent = `Viewport: ${w} \u00d7 ${h} px`;
+      }
+    }
+
+    const JOB_VIEWPORT_IDS = {
+      aspectRatio: 'jobAspectRatio', fields: 'viewportFields',
+      height: 'jobViewportHeight', width: 'jobViewportWidth',
+      preview: 'viewportPreview', heightLabel: 'viewportHeightLabel'
+    };
+    const SETTINGS_VIEWPORT_IDS = {
+      aspectRatio: 'settingsAspectRatio', fields: 'settingsViewportFields',
+      height: 'settingsViewportHeight', width: 'settingsViewportWidth',
+      preview: 'settingsViewportPreview', heightLabel: 'settingsViewportHeightLabel'
+    };
+
+    function updateViewportUI() { updateViewportForIds(JOB_VIEWPORT_IDS); }
+    function onViewportWidthChange() { onViewportWidthChangeForIds(JOB_VIEWPORT_IDS); }
+    function updateSettingsViewportUI() { updateViewportForIds(SETTINGS_VIEWPORT_IDS); }
+    function onSettingsViewportWidthChange() { onViewportWidthChangeForIds(SETTINGS_VIEWPORT_IDS); }
+
+    // Shared debug chrome status renderer
+    function renderDebugChromeStatus(status) {
+      const btnLaunch = document.getElementById('btnLaunchChrome');
+      const btnStop = document.getElementById('btnStopChrome');
+      const statusEl = document.getElementById('debugChromeStatus');
+      if (!btnLaunch || !btnStop || !statusEl) return;
+      if (status.running) {
+        btnLaunch.style.display = 'none';
+        btnStop.style.display = '';
+        statusEl.textContent = `Running (pid: ${status.pid}, port: ${status.port})`;
+        statusEl.style.color = 'var(--color-success)';
+      } else {
+        btnLaunch.style.display = '';
+        btnStop.style.display = 'none';
+        statusEl.textContent = 'Not running';
+        statusEl.style.color = 'var(--color-text-secondary)';
+      }
+    }
+
+    // Shared connection error handler
+    function showDisconnected() {
+      const badge = document.getElementById('connectionBadge');
+      const text = document.getElementById('statusText');
+      badge.className = 'connection-badge error';
+      text.textContent = 'disconnected';
+    }
+
+    // Render cache for skip-if-unchanged optimization
+    let _prevDashboardJson = '';
+    let _prevRecordingsJson = '';
+
+    let currentConfig = null;
+    let jobStates = [];
+    let recordings = [];
+    let activeRecordingsList = [];
+    let completedRecordingsList = [];
+    let statusData = null;
+    let _playerCurrentFilename = null;
+    let _playerKeyHandler = null;
+
+    // API helper
+    async function api(method, path, body) {
+      const opts = {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+      };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(path, opts);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    // Toast
+    function toast(message, type = 'info') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      if (type === 'error') {
+        el.style.cssText = 'display:flex;align-items:center;gap:10px;cursor:pointer';
+        el.innerHTML = '<span style="flex:1">' + escapeHtml(message) + '</span><span style="opacity:0.7;font-size:16px" title="Dismiss">&times;</span>';
+        el.onclick = () => { el.classList.add('removing'); setTimeout(() => el.remove(), 200); };
+      } else {
+        el.textContent = message;
+        setTimeout(() => {
+          el.classList.add('removing');
+          setTimeout(() => el.remove(), 200);
+        }, 3000);
+      }
+      document.getElementById('toastContainer').appendChild(el);
+    }
+
+    // Navigation
+    function switchSection(section) {
+      document.querySelectorAll('.section-nav button').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+        b.setAttribute('tabindex', '-1');
+      });
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      const btn = document.querySelector(`[data-section="${section}"]`);
+      if (btn) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        btn.setAttribute('tabindex', '0');
+      }
+      const panel = document.getElementById(`section-${section}`);
+      if (panel) panel.classList.add('active');
+      if (section === 'recordings') fetchRecordings();
+      if (section === 'active') fetchDashboard();
+    }
+
+    document.getElementById('sectionNav').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-section]');
+      if (!btn) return;
+      location.hash = btn.dataset.section;
+    });
+
+    // Arrow key navigation for tabs
+    document.getElementById('sectionNav').addEventListener('keydown', (e) => {
+      const tabs = [...document.querySelectorAll('.section-nav button[data-section]')];
+      const idx = tabs.indexOf(e.target);
+      if (idx === -1) return;
+      let newIdx;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        newIdx = (idx + 1) % tabs.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        newIdx = (idx - 1 + tabs.length) % tabs.length;
+      } else if (e.key === 'Home') {
+        newIdx = 0;
+      } else if (e.key === 'End') {
+        newIdx = tabs.length - 1;
+      } else {
+        return;
+      }
+      e.preventDefault();
+      tabs[newIdx].focus();
+      tabs[newIdx].click();
+    });
+
+    window.addEventListener('hashchange', () => {
+      let section = location.hash.slice(1) || 'jobs';
+      if (section === 'status' || section === 'settings') { section = 'jobs'; location.hash = 'jobs'; return; }
+      switchSection(section);
+    });
+
+    // Set initial section from URL hash
+    {
+      let initialSection = location.hash.slice(1) || 'jobs';
+      if (initialSection === 'status' || initialSection === 'settings') { initialSection = 'jobs'; location.hash = 'jobs'; }
+      if (initialSection !== 'jobs') switchSection(initialSection);
+    }
+
+    // Close modals with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (_playerCurrentFilename) return;
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) closeModal(backdrop);
+      }
+    });
+
+    // Job sort
+    let _jobSort = 'next-run';
+
+    function sortJobs(jobs, stateMap) {
+      if (_jobSort === 'default') return jobs;
+      const sorted = [...jobs];
+      switch (_jobSort) {
+        case 'name':
+          sorted.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'target':
+          sorted.sort((a, b) => (a.urlPattern || a.url || '').localeCompare(b.urlPattern || b.url || ''));
+          break;
+        case 'next-run':
+          sorted.sort((a, b) => {
+            const aNext = stateMap[a.id]?.nextRun || '';
+            const bNext = stateMap[b.id]?.nextRun || '';
+            if (!aNext && !bNext) return 0;
+            if (!aNext) return 1;
+            if (!bNext) return -1;
+            return aNext.localeCompare(bNext);
+          });
+          break;
+        case 'status':
+          sorted.sort((a, b) => {
+            const order = { recording: 0, error: 1, success: 2, idle: 3 };
+            const aStatus = activeRecordingsList.some(r => r.jobName === a.name) ? 'recording'
+              : (stateMap[a.id]?.lastResult || 'idle');
+            const bStatus = activeRecordingsList.some(r => r.jobName === b.name) ? 'recording'
+              : (stateMap[b.id]?.lastResult || 'idle');
+            return (order[aStatus] ?? 3) - (order[bStatus] ?? 3);
+          });
+          break;
+        case 'schedule':
+          sorted.sort((a, b) => {
+            if (!a.schedule && !b.schedule) return 0;
+            if (!a.schedule) return 1;
+            if (!b.schedule) return -1;
+            return a.schedule.localeCompare(b.schedule);
+          });
+          break;
+      }
+      return sorted;
+    }
+
+    function setJobSort(value) {
+      _jobSort = value;
+      renderJobs();
+    }
+
+    // Render jobs
+    function renderJobs() {
+      const el = document.getElementById('jobsTable');
+
+      // Loading state
+      if (!currentConfig) {
+        el.innerHTML = '<div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div>';
+        return;
+      }
+
+      // Empty state
+      if (currentConfig.jobs.length === 0) {
+        el.innerHTML = '<div class="empty-state" style="text-align:left;max-width:460px;margin:0 auto;padding:32px 24px">'
+          + '<div class="empty-state-title" style="font-size:16px;margin-bottom:16px;text-align:center">Get Started with croncast</div>'
+          + '<ol style="list-style:none;counter-reset:steps;padding:0;margin:0 0 20px">'
+          + '<li style="counter-increment:steps;padding:10px 0;display:flex;gap:12px;align-items:flex-start;font-size:14px">'
+          + '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--color-accent);color:white;font-size:12px;font-weight:600">1</span>'
+          + '<span>Configure your <a href="#" onclick="switchSection(\'settings\');return false" style="color:var(--color-accent)">browser connection</a> in Settings (connect to an existing Chrome or launch one)</span></li>'
+          + '<li style="counter-increment:steps;padding:10px 0;display:flex;gap:12px;align-items:flex-start;font-size:14px">'
+          + '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--color-accent);color:white;font-size:12px;font-weight:600">2</span>'
+          + '<span>Create your first job &mdash; pick a URL to record, set a schedule and duration</span></li>'
+          + '<li style="counter-increment:steps;padding:10px 0;display:flex;gap:12px;align-items:flex-start;font-size:14px">'
+          + '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--color-accent);color:white;font-size:12px;font-weight:600">3</span>'
+          + '<span>Test the job to verify the pipeline, then trigger or wait for the schedule</span></li>'
+          + '</ol>'
+          + '<div style="text-align:center"><button class="btn btn-primary" onclick="showJobModal()">Create First Job</button></div>'
+          + '</div>';
+        return;
+      }
+
+      const stateMap = {};
+      for (const s of jobStates) stateMap[s.id] = s;
+
+      const sorted = sortJobs(currentConfig.jobs, stateMap);
+
+      // Sort dropdown in header
+      const sortBar = document.getElementById('jobSortBar');
+      if (sortBar) {
+        if (currentConfig.jobs.length > 1) {
+          sortBar.innerHTML = '<span class="sort-label">Sort</span><select class="sort-select" onchange="setJobSort(this.value)">'
+            + `<option value="default"${_jobSort === 'default' ? ' selected' : ''}>Default</option>`
+            + `<option value="name"${_jobSort === 'name' ? ' selected' : ''}>Name</option>`
+            + `<option value="target"${_jobSort === 'target' ? ' selected' : ''}>Target</option>`
+            + `<option value="schedule"${_jobSort === 'schedule' ? ' selected' : ''}>Schedule</option>`
+            + `<option value="next-run"${_jobSort === 'next-run' ? ' selected' : ''}>Next run</option>`
+            + `<option value="status"${_jobSort === 'status' ? ' selected' : ''}>Status</option>`
+            + '</select>';
+        } else {
+          sortBar.innerHTML = '';
+        }
+      }
+
+      let html = '<div class="job-cards">';
+
+      for (const job of sorted) {
+        const state = stateMap[job.id];
+        const target = job.urlPattern || job.url || '\u2014';
+        const duration = formatDuration(job.durationSeconds);
+        const activeCount = activeRecordingsList.filter(r => r.jobName === job.name).length;
+        let statusHtml;
+        if (activeCount > 0) {
+          statusHtml = `<span class="pill pill-recording"><span class="pulse-dot"></span> recording${activeCount > 1 ? ' (' + activeCount + ')' : ''}</span>`;
+        } else if (state && state.lastResult === 'success') {
+          statusHtml = '<span class="pill pill-success">success</span>';
+        } else if (state && state.lastResult === 'error') {
+          statusHtml = `<span class="pill pill-error" title="${escapeHtml(state.lastError || '')}">error</span>`;
+        } else if (state && state.nextRun) {
+          const ms = new Date(state.nextRun).getTime() - Date.now();
+          if (ms > 0 && ms <= 3600000) {
+            statusHtml = `<span class="pill pill-countdown" data-next="${escapeHtml(state.nextRun)}">&#9201; ${formatCountdown(ms)}</span>`;
+          } else {
+            statusHtml = '<span class="pill pill-idle">idle</span>';
+          }
+        } else {
+          statusHtml = '<span class="pill pill-idle">idle</span>';
+        }
+        const nextRun = state && state.nextRun ? formatDate(state.nextRun) : '\u2014';
+        const idx = currentConfig.jobs.findIndex(j => j.id === job.id);
+
+        html += '<div class="job-card">';
+        html += '<div class="job-card-header">';
+        html += `<div class="job-card-name" title="${escapeHtml(job.name)}">${escapeHtml(job.name)}</div>`;
+        html += statusHtml;
+        html += '</div>';
+        html += '<div class="job-card-row">';
+        html += '<div class="job-card-meta">';
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Target</span><span class="job-card-meta-value mono" title="${escapeHtml(target)}">${escapeHtml(target)}</span></div>`;
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Schedule</span><span class="job-card-meta-value" title="${escapeHtml(job.schedule || 'Manual')}">${job.schedule ? escapeHtml(humanSchedule(job.schedule)) : 'Manual'}</span></div>`;
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Duration</span><span class="job-card-meta-value">${duration}</span></div>`;
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Next Run</span><span class="job-card-meta-value">${nextRun}</span></div>`;
+        html += '</div></div>';
+        html += '<div class="job-card-footer">';
+        html += `<button class="btn btn-ghost btn-sm" onclick="showTestModal('${escapeHtml(job.id)}')">Test</button>`;
+        html += `<button class="btn btn-ghost btn-sm" onclick="handleTrigger('${escapeHtml(job.id)}')">Trigger</button>`;
+        html += `<button class="btn btn-ghost btn-sm" onclick="showJobModal(${idx})">Edit</button>`;
+        html += `<button class="btn btn-danger btn-sm" onclick="deleteJob(${idx})">Delete</button>`;
+        html += '</div>';
+        html += '</div>';
+      }
+
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    // Recording sort
+    let _recSort = 'newest';
+
+    function sortRecordings(recs) {
+      const sorted = [...recs];
+      switch (_recSort) {
+        case 'newest':
+          sorted.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+          break;
+        case 'oldest':
+          sorted.sort((a, b) => new Date(a.modified) - new Date(b.modified));
+          break;
+        case 'name':
+          sorted.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'largest':
+          sorted.sort((a, b) => b.size - a.size);
+          break;
+        case 'smallest':
+          sorted.sort((a, b) => a.size - b.size);
+          break;
+      }
+      return sorted;
+    }
+
+    function setRecSort(value) {
+      _recSort = value;
+      renderRecordings();
+    }
+
+    // Render recordings
+    function renderRecordings() {
+      const el = document.getElementById('recordingsTable');
+
+      // Sort dropdown in header
+      const sortBar = document.getElementById('recSortBar');
+      if (sortBar) {
+        if (recordings.length > 1) {
+          sortBar.innerHTML = '<span class="sort-label">Sort</span><select class="sort-select" onchange="setRecSort(this.value)">'
+            + `<option value="newest"${_recSort === 'newest' ? ' selected' : ''}>Newest</option>`
+            + `<option value="oldest"${_recSort === 'oldest' ? ' selected' : ''}>Oldest</option>`
+            + `<option value="name"${_recSort === 'name' ? ' selected' : ''}>Name</option>`
+            + `<option value="largest"${_recSort === 'largest' ? ' selected' : ''}>Largest</option>`
+            + `<option value="smallest"${_recSort === 'smallest' ? ' selected' : ''}>Smallest</option>`
+            + '</select>';
+        } else {
+          sortBar.innerHTML = '';
+        }
+      }
+
+      if (recordings.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#127910;</div><div class="empty-state-title">No recordings yet</div><div class="empty-state-hint">Recordings will appear here after jobs run.<br><a href="#" onclick="switchSection(\'jobs\');return false" style="color:var(--color-accent)">Go to Jobs</a> to trigger a recording.</div></div>';
+        return;
+      }
+
+      const sorted = sortRecordings(recordings);
+      let html = '<div class="job-cards">';
+
+      for (const rec of sorted) {
+        html += '<div class="job-card">';
+        html += '<div class="job-card-row">';
+        html += `<div class="job-card-name mono" style="flex:1">${escapeHtml(rec.name)}</div>`;
+        html += '<div class="job-card-meta" style="flex-shrink:0">';
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Size</span><span class="job-card-meta-value">${formatBytes(rec.size)}</span></div>`;
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Date</span><span class="job-card-meta-value">${formatDate(rec.modified)}</span></div>`;
+        html += '</div></div>';
+        html += '<div class="job-card-footer">';
+        html += `<button class="btn btn-ghost btn-sm" onclick="showPlayerModal('${escapeHtml(rec.name)}')">Play</button>`;
+        html += `<a class="btn btn-ghost btn-sm" href="/api/recordings/${encodeURIComponent(rec.name)}" download>Download</a>`;
+        html += `<button class="btn btn-danger btn-sm" onclick="deleteRecording('${escapeHtml(rec.name)}')">Delete</button>`;
+        html += '</div>';
+        html += '</div>';
+      }
+
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    // Render status (updates header badge only; detailed view is in the modal)
+    function renderStatus() {
+      if (!statusData) return;
+      const badge = document.getElementById('connectionBadge');
+      const text = document.getElementById('statusText');
+      const hasFail = statusData.preflight.some(c => c.status === 'fail');
+      badge.className = 'connection-badge' + (hasFail ? ' error' : '');
+      text.textContent = statusData.mode + ' mode';
+    }
+
+    // Show status details in a modal (triggered by clicking the connection badge)
+    function showErrorModal(jobName, errorText) {
+      let html = '<div class="modal-backdrop">';
+      html += '<div class="modal">';
+      html += `<h3>Error: ${escapeHtml(jobName)}</h3>`;
+      html += `<div class="error-detail">${escapeHtml(errorText)}</div>`;
+      html += '<div class="form-actions">';
+      html += '<button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(this.closest(\'.modal\').querySelector(\'.error-detail\').textContent).then(()=>{this.textContent=\'Copied!\';setTimeout(()=>this.textContent=\'Copy Error\',1500)})">Copy Error</button>';
+      html += '<button class="btn btn-ghost btn-sm" onclick="closeModal(this)">Close</button>';
+      html += '</div>';
+      html += '</div></div>';
+      openModal(html);
+    }
+
+    function showStatusModal() {
+      if (!statusData) return;
+      const icons = { pass: '\u2713', warn: '\u26A0', fail: '\u2717' };
+      const iconLabels = { pass: 'Passed', warn: 'Warning', fail: 'Failed' };
+
+      let body = '<ul class="check-list">';
+      for (const check of statusData.preflight) {
+        body += '<li>';
+        body += `<span class="check-icon ${check.status}" aria-label="${iconLabels[check.status]}">${icons[check.status]}</span>`;
+        body += '<div>';
+        body += `<div>${escapeHtml(check.name)}: ${escapeHtml(check.message)}</div>`;
+        if (check.detail) {
+          body += `<div class="check-detail"><code>${escapeHtml(check.detail)}</code></div>`;
+        }
+        body += '</div>';
+        body += '</li>';
+      }
+      body += '</ul>';
+
+      let html = '<div class="modal-backdrop">';
+      html += '<div class="modal">';
+      html += '<h3>System Status</h3>';
+      html += body;
+      html += '<div class="form-actions" style="justify-content:space-between;align-items:center">';
+      html += '<div class="status-modal-footer">';
+      html += `<span>Uptime: ${formatDuration(statusData.uptime)}</span>`;
+      html += `<span class="status-footer-spacer">Mode: <span class="mono">${escapeHtml(statusData.mode)}</span></span>`;
+      html += '</div>';
+      html += '<button class="btn btn-ghost" onclick="closeModal(this)">Close</button>';
+      html += '</div>';
+      html += '</div></div>';
+
+      openModal(html);
+    }
+
+    // Settings modal
+    function showSettingsModal() {
+      const themeIcon = getTheme() === 'dark' ? '\u2600' : '\u263E';
+      let html = '<div class="modal-backdrop">';
+      html += '<div class="modal modal-settings">';
+      html += '<div class="settings-modal-header">';
+      html += '<h3>Settings</h3>';
+      html += '<div class="settings-modal-theme">';
+      html += '<span>Theme</span>';
+      html += '<button class="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light theme" onclick="toggleTheme()">' + themeIcon + '</button>';
+      html += '</div></div>';
+      html += '<form id="settingsForm" onsubmit="saveSettings(event)">';
+      html += '<div class="settings-cards" id="settingsFields"></div>';
+      html += '<div class="settings-save-bar">';
+      html += '<button type="submit" class="btn btn-primary">Save Settings</button>';
+      html += '</div>';
+      html += '</form>';
+      html += '</div></div>';
+      openModal(html);
+      renderSettings();
+    }
+
+    // Render settings
+    function renderSettings() {
+      if (!currentConfig) return;
+      const el = document.getElementById('settingsFields');
+      if (!el) return;
+      const isLaunch = !!currentConfig.executablePath;
+
+      let html = '';
+
+      // -- Card 1: Browser --
+      html += '<div class="settings-card">';
+      html += '<div class="settings-card-header">';
+      html += '<span class="settings-icon">&#127760;</span>';
+      html += '<div><h3>Browser</h3><p>How croncast connects to or launches Chrome</p></div>';
+      html += '</div>';
+
+      html += '<div class="form-group">';
+      html += '<label>Browser Mode</label>';
+      html += `<select id="settingMode" onchange="toggleModeFields()">`;
+      html += `<option value="connect" ${!isLaunch ? 'selected' : ''}>Connect (attach to existing browser)</option>`;
+      html += `<option value="launch" ${isLaunch ? 'selected' : ''}>Launch (start browser automatically)</option>`;
+      html += '</select></div>';
+
+      html += `<div id="connectFields" style="display:${!isLaunch ? 'block' : 'none'}">`;
+      html += '<div class="form-group"><label>Browser URL</label>';
+      html += `<input type="text" id="settingBrowserURL" class="mono-input" value="${escapeHtml(currentConfig.browserURL || 'http://localhost:9222')}"></div>`;
+      html += '<div class="form-group"><label>Chrome Path</label>';
+      html += `<input type="text" id="settingChromePath" class="mono-input" value="${escapeHtml(currentConfig.chromePath || '')}" placeholder="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"></div>`;
+      html += '<div class="form-group"><label>Debug Chrome</label>';
+      html += '<div class="debug-chrome-row">';
+      html += '<button type="button" class="btn btn-primary btn-sm" id="btnLaunchChrome" onclick="handleLaunchChrome()">Launch Chrome</button>';
+      html += '<button type="button" class="btn btn-danger btn-sm" id="btnStopChrome" onclick="handleStopChrome()" style="display:none">Stop Chrome</button>';
+      html += '<span id="debugChromeStatus" style="font-size:13px;color:var(--color-text-secondary)"></span>';
+      html += '</div></div>';
+      html += '</div>';
+
+      html += `<div id="launchFields" style="display:${isLaunch ? 'block' : 'none'}">`;
+      html += '<div class="form-group"><label>Executable Path</label>';
+      html += `<input type="text" id="settingExecPath" class="mono-input" value="${escapeHtml(currentConfig.executablePath || '')}"></div>`;
+      html += '<div class="form-group"><label>Headless</label>';
+      html += `<select id="settingHeadless">`;
+      html += `<option value="false" ${!currentConfig.headless ? 'selected' : ''}>No</option>`;
+      html += `<option value="true" ${currentConfig.headless ? 'selected' : ''}>Yes</option>`;
+      html += '</select></div></div>';
+
+      html += '<div id="helpConnect" class="help-box">';
+      html += '<details><summary>How to start Chrome for connect mode</summary>';
+      html += '<div class="help-content">';
+      html += '<p>croncast connects to a browser that\'s already running with remote debugging enabled. Start Chrome with these flags:</p>';
+      html += '<p><strong>Linux</strong></p>';
+      html += '<pre>google-chrome --remote-debugging-port=9222 --remote-allow-origins=* --user-data-dir=/tmp/chrome-debug</pre>';
+      html += '<p><strong>macOS</strong></p>';
+      html += '<pre>/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222 --remote-allow-origins=* --user-data-dir=/tmp/chrome-debug</pre>';
+      html += '<p><strong>Windows</strong></p>';
+      html += '<pre>chrome.exe --remote-debugging-port=9222 --remote-allow-origins=* --user-data-dir=C:\\temp\\chrome-debug</pre>';
+      html += '<p>Then navigate to the page you want to record. croncast will find the tab by matching the URL pattern you configure in each job.</p>';
+      html += '<p>The port in the command must match the <strong>Browser URL</strong> setting above (default: <code>http://localhost:9222</code>).</p>';
+      html += '</div></details></div>';
+
+      html += '<div id="helpLaunch" class="help-box">';
+      html += '<details><summary>How to configure launch mode</summary>';
+      html += '<div class="help-content">';
+      html += '<p>In launch mode, croncast starts and manages the browser automatically. You just need to provide the path to the Chrome or Chromium binary.</p>';
+      html += '<p><strong>Common paths:</strong></p>';
+      html += '<ul>';
+      html += '<li>Linux: <code>/usr/bin/google-chrome</code> or <code>/usr/bin/chromium-browser</code></li>';
+      html += '<li>macOS: <code>/Applications/Google Chrome.app/Contents/MacOS/Google Chrome</code></li>';
+      html += '<li>Windows (WSL): <code>/mnt/c/Program Files/Google/Chrome/Application/chrome.exe</code></li>';
+      html += '</ul>';
+      html += '<p>Each job should have a <strong>URL</strong> set so croncast knows where to navigate. Set <strong>Headless</strong> to No if you need to interact with the browser (e.g., to log in before recording).</p>';
+      html += '</div></details></div>';
+
+      html += '</div>'; // end Browser card
+
+      // -- Card 2: Viewport --
+      html += '<div class="settings-card">';
+      html += '<div class="settings-card-header">';
+      html += '<span class="settings-icon">&#9634;</span>';
+      html += '<div><h3>Viewport</h3><p>Override browser viewport size for all pages</p></div>';
+      html += '</div>';
+
+      html += '<div id="setViewportSection">';
+      html += '<div class="form-group"><label>Aspect Ratio</label>';
+      html += '<select id="settingsAspectRatio" onchange="updateSettingsViewportUI()">';
+      html += '<option value="none">None</option>';
+      html += '<option value="16:9">16:9</option>';
+      html += '<option value="4:3">4:3</option>';
+      html += '<option value="1:1">1:1</option>';
+      html += '<option value="21:9">21:9</option>';
+      html += '<option value="custom">Custom</option>';
+      html += '</select></div>';
+      html += '<div id="settingsViewportFields" style="display:none">';
+      html += '<div class="settings-inline-row">';
+      html += '<div class="form-group"><label>Width (px)</label>';
+      html += '<input type="number" id="settingsViewportWidth" min="1" value="1920" oninput="onSettingsViewportWidthChange()"></div>';
+      html += '<div class="form-group"><label>Height (px) <span id="settingsViewportHeightLabel" style="font-weight:400"></span></label>';
+      html += '<input type="number" id="settingsViewportHeight" min="1" value="1080"></div>';
+      html += '</div>';
+      html += '<div id="settingsViewportPreview" style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px"></div>';
+      html += '<button type="button" class="btn btn-primary btn-sm" onclick="handleSetViewport()">Apply Viewport</button>';
+      html += '</div>';
+      html += '</div>';
+
+      html += '</div>'; // end Viewport card
+
+      // -- Card 3: Storage --
+      html += '<div class="settings-card">';
+      html += '<div class="settings-card-header">';
+      html += '<span class="settings-icon">&#128193;</span>';
+      html += '<div><h3>Storage</h3><p>Where recordings are saved on disk</p></div>';
+      html += '</div>';
+
+      html += '<div class="form-group"><label>Output Directory</label>';
+      html += `<input type="text" id="settingOutputDir" class="mono-input" value="${escapeHtml(currentConfig.outputDir)}">`;
+      html += '</div>';
+
+      html += '</div>'; // end Storage card
+
+      // -- Card 4: Server --
+      html += '<div class="settings-card">';
+      html += '<div class="settings-card-header">';
+      html += '<span class="settings-icon">&#9881;</span>';
+      html += '<div><h3>Server</h3><p>Dashboard server configuration</p></div>';
+      html += '</div>';
+
+      html += '<div class="form-group"><label>Port</label>';
+      html += `<input type="number" id="settingPort" value="${currentConfig.port}">`;
+      html += '<div class="form-hint">Saved to config only. Requires a restart of croncast to take effect.</div></div>';
+
+      html += '</div>'; // end Server card
+
+      el.innerHTML = html;
+
+      // Fix the connect/launch display
+      toggleModeFields();
+    }
+
+    function toggleModeFields() {
+      const mode = document.getElementById('settingMode').value;
+      document.getElementById('connectFields').style.display = mode === 'connect' ? 'block' : 'none';
+      document.getElementById('launchFields').style.display = mode === 'launch' ? 'block' : 'none';
+      const helpConnect = document.getElementById('helpConnect');
+      const helpLaunch = document.getElementById('helpLaunch');
+      if (helpConnect) helpConnect.style.display = mode === 'connect' ? 'block' : 'none';
+      if (helpLaunch) helpLaunch.style.display = mode === 'launch' ? 'block' : 'none';
+    }
+
+    // Schedule builder helpers
+    function parseCronToUI(cronExpr) {
+      if (!cronExpr) return { mode: 'manual' };
+      const parts = (cronExpr || '').trim().split(/\s+/);
+      if (parts.length !== 5) return { mode: 'custom', raw: cronExpr };
+
+      const [min, hr, dom, mon, dow] = parts;
+
+      // Every X minutes: */N * * * *
+      const everyMinMatch = min.match(/^\*\/(\d+)$/);
+      if (everyMinMatch && hr === '*' && dom === '*' && mon === '*' && dow === '*')
+        return { mode: 'everyMin', interval: parseInt(everyMinMatch[1], 10) };
+
+      // Every X hours: M */N * * *  or  M * * * * (every 1 hour at minute M)
+      const everyHrMatch = hr.match(/^\*\/(\d+)$/);
+      if (/^\d+$/.test(min) && everyHrMatch && dom === '*' && mon === '*' && dow === '*')
+        return { mode: 'everyHr', interval: parseInt(everyHrMatch[1], 10), minute: parseInt(min, 10) };
+      if (/^\d+$/.test(min) && hr === '*' && dom === '*' && mon === '*' && dow === '*')
+        return { mode: 'everyHr', interval: 1, minute: parseInt(min, 10) };
+
+      // Daily: M H * * *
+      if (/^\d+$/.test(min) && /^\d+$/.test(hr) && dom === '*' && mon === '*' && dow === '*')
+        return { mode: 'daily', hour: parseInt(hr, 10), minute: parseInt(min, 10) };
+
+      // Weekly: M H * * D
+      if (/^\d+$/.test(min) && /^\d+$/.test(hr) && dom === '*' && mon === '*' && /^\d+$/.test(dow))
+        return { mode: 'weekly', day: parseInt(dow, 10), hour: parseInt(hr, 10), minute: parseInt(min, 10) };
+
+      return { mode: 'custom', raw: cronExpr };
+    }
+
+    function buildCronFromUI() {
+      const mode = document.getElementById('jobScheduleMode').value;
+      switch (mode) {
+        case 'manual':
+          return '';
+        case 'everyMin': {
+          const n = parseInt(document.getElementById('jobSchedEveryMin').value, 10) || 5;
+          return `*/${n} * * * *`;
+        }
+        case 'everyHr': {
+          const n = parseInt(document.getElementById('jobSchedEveryHr').value, 10) || 1;
+          const m = document.getElementById('jobSchedMinute').value;
+          return n === 1 ? `${m} * * * *` : `${m} */${n} * * *`;
+        }
+        case 'daily': {
+          const m = document.getElementById('jobSchedMinute').value;
+          const h = document.getElementById('jobSchedHour').value;
+          return `${m} ${h} * * *`;
+        }
+        case 'weekly': {
+          const m = document.getElementById('jobSchedMinute').value;
+          const h = document.getElementById('jobSchedHour').value;
+          const d = document.getElementById('jobSchedDay').value;
+          return `${m} ${h} * * ${d}`;
+        }
+        case 'custom':
+          return document.getElementById('jobSchedCustom').value.trim();
+        default:
+          return '';
+      }
+    }
+
+    function getSchedulePreview() {
+      const mode = document.getElementById('jobScheduleMode').value;
+      switch (mode) {
+        case 'manual':
+          return 'Runs: Manual trigger only';
+        case 'everyMin': {
+          const n = parseInt(document.getElementById('jobSchedEveryMin')?.value, 10) || 5;
+          return `Runs: Every ${n} minute${n === 1 ? '' : 's'}`;
+        }
+        case 'everyHr': {
+          const n = parseInt(document.getElementById('jobSchedEveryHr')?.value, 10) || 1;
+          const m = document.getElementById('jobSchedMinute')?.value || '0';
+          const label = n === 1 ? 'Every hour' : `Every ${n} hours`;
+          return `Runs: ${label} at :${String(m).padStart(2, '0')}`;
+        }
+        case 'daily': {
+          const m = document.getElementById('jobSchedMinute').value;
+          const h = document.getElementById('jobSchedHour').value;
+          return `Runs: Every day at ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+        case 'weekly': {
+          const m = document.getElementById('jobSchedMinute').value;
+          const h = document.getElementById('jobSchedHour').value;
+          const d = document.getElementById('jobSchedDay').value;
+          const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          return `Runs: Every ${days[d]} at ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+        case 'custom': {
+          const v = document.getElementById('jobSchedCustom')?.value.trim();
+          return v ? `Runs: Custom (${v})` : 'Runs: —';
+        }
+        default: return '';
+      }
+    }
+
+    function updateScheduleUI() {
+      const mode = document.getElementById('jobScheduleMode').value;
+      const subEl = document.getElementById('scheduleSubFields');
+      let html = '';
+
+      if (mode === 'everyMin') {
+        html += '<label>Every</label>';
+        html += '<input type="number" id="jobSchedEveryMin" min="1" max="59" value="5" style="width:72px" oninput="updateSchedulePreview()">';
+        html += '<label>minutes</label>';
+      } else if (mode === 'everyHr') {
+        html += '<label>Every</label>';
+        html += '<input type="number" id="jobSchedEveryHr" min="1" max="23" value="1" style="width:72px" oninput="updateSchedulePreview()">';
+        html += '<label>hours, at minute</label>';
+        html += '<select id="jobSchedMinute" onchange="updateSchedulePreview()">';
+        for (let i = 0; i < 60; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
+        html += '</select>';
+      } else if (mode === 'daily') {
+        html += '<label>Hour</label>';
+        html += '<select id="jobSchedHour" onchange="updateSchedulePreview()">';
+        for (let i = 0; i < 24; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
+        html += '</select>';
+        html += '<label>Minute</label>';
+        html += '<select id="jobSchedMinute" onchange="updateSchedulePreview()">';
+        for (let i = 0; i < 60; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
+        html += '</select>';
+      } else if (mode === 'weekly') {
+        html += '<label>Day</label>';
+        html += '<select id="jobSchedDay" onchange="updateSchedulePreview()">';
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        for (let i = 0; i < 7; i++) html += `<option value="${i}">${days[i]}</option>`;
+        html += '</select>';
+        html += '<label>Hour</label>';
+        html += '<select id="jobSchedHour" onchange="updateSchedulePreview()">';
+        for (let i = 0; i < 24; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
+        html += '</select>';
+        html += '<label>Minute</label>';
+        html += '<select id="jobSchedMinute" onchange="updateSchedulePreview()">';
+        for (let i = 0; i < 60; i++) html += `<option value="${i}">${String(i).padStart(2, '0')}</option>`;
+        html += '</select>';
+      } else if (mode === 'custom') {
+        html += '<input type="text" id="jobSchedCustom" class="mono-input" placeholder="0 9 * * *" style="min-width:160px" oninput="updateSchedulePreview()">';
+      }
+
+      subEl.innerHTML = html;
+      updateSchedulePreview();
+    }
+
+    function updateSchedulePreview() {
+      const el = document.getElementById('schedulePreview');
+      if (el) el.textContent = getSchedulePreview();
+    }
+
+    function applyParsedSchedule(parsed) {
+      const modeEl = document.getElementById('jobScheduleMode');
+      modeEl.value = parsed.mode;
+      updateScheduleUI();
+
+      if (parsed.mode === 'everyMin') {
+        document.getElementById('jobSchedEveryMin').value = parsed.interval;
+      } else if (parsed.mode === 'everyHr') {
+        document.getElementById('jobSchedEveryHr').value = parsed.interval;
+        document.getElementById('jobSchedMinute').value = parsed.minute;
+      } else if (parsed.mode === 'daily') {
+        document.getElementById('jobSchedHour').value = parsed.hour;
+        document.getElementById('jobSchedMinute').value = parsed.minute;
+      } else if (parsed.mode === 'weekly') {
+        document.getElementById('jobSchedDay').value = parsed.day;
+        document.getElementById('jobSchedHour').value = parsed.hour;
+        document.getElementById('jobSchedMinute').value = parsed.minute;
+      } else if (parsed.mode === 'custom' && parsed.raw) {
+        document.getElementById('jobSchedCustom').value = parsed.raw;
+      }
+
+      updateSchedulePreview();
+    }
+
+    // Job modal
+    function showJobModal(editIndex) {
+      const isEdit = editIndex !== undefined;
+      const job = isEdit ? currentConfig.jobs[editIndex] : { name: '', url: '', urlPattern: '', durationSeconds: 60 };
+
+      const durTotal = job.durationSeconds || 0;
+      const durH = Math.floor(durTotal / 3600);
+      const durM = Math.floor((durTotal % 3600) / 60);
+      const durS = durTotal % 60;
+
+      let html = '<div class="modal-backdrop">';
+      html += '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalJobTitle">';
+      html += `<h3 id="modalJobTitle">${isEdit ? 'Edit Job' : 'Add Job'}</h3>`;
+      html += '<div class="form-group"><label>Name</label>';
+      html += `<input type="text" id="jobName" value="${escapeHtml(job.name)}"></div>`;
+      html += '<div class="form-hint" style="margin-bottom:12px;padding:10px 12px;background:var(--color-pill-idle-bg);border-radius:var(--radius-sm)">croncast needs to know which browser tab to record. Use <strong>Tab Match</strong> to find an already-open tab, or <strong>Open URL</strong> to navigate a new tab. You can set both &mdash; Tab Match is tried first.</div>';
+      html += '<div class="form-group"><label>Tab Match <span style="font-weight:400;color:var(--color-text-secondary)">(find open tab by URL substring)</span></label>';
+      html += `<input type="text" id="jobUrlPattern" class="mono-input" value="${escapeHtml(job.urlPattern || '')}" placeholder="example.com/dashboard">`;
+      html += '</div>';
+      html += '<div class="form-group"><label>Open URL <span style="font-weight:400;color:var(--color-text-secondary)">(navigate a new tab)</span></label>';
+      html += `<input type="text" id="jobUrl" class="mono-input" value="${escapeHtml(job.url || '')}" placeholder="https://example.com/dashboard">`;
+      html += '</div>';
+
+      // Schedule builder
+      html += '<div class="form-group"><label>Schedule</label>';
+      html += '<select id="jobScheduleMode" onchange="updateScheduleUI()">';
+      html += '<option value="manual">Manual only</option>';
+      html += '<option value="everyMin">Minute interval</option>';
+      html += '<option value="everyHr">Hourly interval</option>';
+      html += '<option value="daily">Daily</option>';
+      html += '<option value="weekly">Weekly</option>';
+      html += '<option value="custom">Custom cron</option>';
+      html += '</select>';
+      html += '<div class="schedule-sub-fields" id="scheduleSubFields"></div>';
+      html += '<div class="schedule-preview" id="schedulePreview"></div>';
+      html += '<div class="form-hint">Times are in server timezone (' + escapeHtml((statusData?.timezone || 'local').replace(/_/g, ' ')) + ')</div>';
+      html += '</div>';
+
+      // Duration h/m/s
+      html += '<div class="form-group"><label>Duration</label>';
+      html += '<div class="dur-row">';
+      html += `<div class="dur-field"><input type="number" id="jobDurH" value="${durH}" min="0"><span class="dur-label">h</span></div>`;
+      html += `<div class="dur-field"><input type="number" id="jobDurM" value="${durM}" min="0" max="59"><span class="dur-label">m</span></div>`;
+      html += `<div class="dur-field"><input type="number" id="jobDurS" value="${durS}" min="0" max="59"><span class="dur-label">s</span></div>`;
+      html += '</div></div>';
+
+      html += '<div class="form-group"><label>Capture FPS</label>';
+      html += `<input type="number" id="jobCaptureFps" min="1" max="30" value="${job.captureFps || 2}">`;
+      html += '<div class="form-hint">Frames per second (1-2 for static pages, 5-10 for dynamic content)</div>';
+      html += '</div>';
+
+      // Viewport / Aspect Ratio
+      const detectedRatio = (job.viewportWidth && job.viewportHeight) ? detectAspectRatio(job.viewportWidth, job.viewportHeight) : 'none';
+      html += '<div class="form-group"><label>Viewport / Aspect Ratio</label>';
+      html += '<select id="jobAspectRatio" onchange="updateViewportUI()">';
+      html += `<option value="none" ${detectedRatio === 'none' ? 'selected' : ''}>None (use browser size)</option>`;
+      html += `<option value="16:9" ${detectedRatio === '16:9' ? 'selected' : ''}>16:9</option>`;
+      html += `<option value="4:3" ${detectedRatio === '4:3' ? 'selected' : ''}>4:3</option>`;
+      html += `<option value="1:1" ${detectedRatio === '1:1' ? 'selected' : ''}>1:1</option>`;
+      html += `<option value="21:9" ${detectedRatio === '21:9' ? 'selected' : ''}>21:9</option>`;
+      html += `<option value="custom" ${detectedRatio === 'custom' ? 'selected' : ''}>Custom</option>`;
+      html += '</select></div>';
+
+      html += '<div id="viewportFields" style="display:none">';
+      html += '<div class="form-group"><label>Width (px)</label>';
+      html += `<input type="number" id="jobViewportWidth" min="1" value="${job.viewportWidth || 1920}" oninput="onViewportWidthChange()">`;
+      html += '</div>';
+      html += '<div class="form-group" id="viewportHeightGroup">';
+      html += '<label>Height (px) <span id="viewportHeightLabel" style="font-weight:400"></span></label>';
+      html += `<input type="number" id="jobViewportHeight" min="1" value="${job.viewportHeight || 1080}">`;
+      html += '</div>';
+      html += '<div id="viewportPreview" style="font-size:12px;color:var(--color-text-secondary);margin-bottom:16px"></div>';
+      html += '</div>';
+
+      html += '<div class="form-actions">';
+      html += '<button class="btn btn-ghost" onclick="closeModal(this)">Cancel</button>';
+      html += `<button class="btn btn-primary" onclick="saveJob(${isEdit ? editIndex : -1})">Save</button>`;
+      html += '</div></div></div>';
+
+      openModal(html);
+
+      // Apply parsed schedule after DOM is in place
+      const parsed = parseCronToUI(job.schedule);
+      applyParsedSchedule(parsed);
+
+      // Initialize viewport UI
+      updateViewportUI();
+
+      if (!isEdit) document.getElementById('jobName').focus();
+    }
+
+    async function saveJob(editIndex) {
+      const saveBtn = document.querySelector('.modal .btn-primary');
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
+
+      const h = parseInt(document.getElementById('jobDurH').value, 10) || 0;
+      const m = parseInt(document.getElementById('jobDurM').value, 10) || 0;
+      const s = parseInt(document.getElementById('jobDurS').value, 10) || 0;
+      const durationSeconds = h * 3600 + m * 60 + s;
+
+      const schedule = buildCronFromUI() || undefined;
+
+      const rawFps = parseInt(document.getElementById('jobCaptureFps').value, 10);
+      const captureFps = (isNaN(rawFps) || rawFps < 1) ? 2 : Math.min(rawFps, 30);
+
+      const job = {
+        name: document.getElementById('jobName').value.trim(),
+        durationSeconds,
+        captureFps,
+      };
+      if (schedule) job.schedule = schedule;
+
+      // Viewport
+      const aspectRatio = document.getElementById('jobAspectRatio').value;
+      if (aspectRatio !== 'none') {
+        const vw = parseInt(document.getElementById('jobViewportWidth').value, 10);
+        const vh = parseInt(document.getElementById('jobViewportHeight').value, 10);
+        if (vw > 0 && vh > 0) {
+          job.viewportWidth = vw;
+          job.viewportHeight = vh;
+        }
+      }
+
+      if (editIndex >= 0) {
+        job.id = currentConfig.jobs[editIndex].id;
+      }
+
+      const url = document.getElementById('jobUrl').value.trim();
+      const urlPattern = document.getElementById('jobUrlPattern').value.trim();
+      if (url) job.url = url;
+      if (urlPattern) job.urlPattern = urlPattern;
+
+      // Inline validation — highlight fields with errors
+      let hasError = false;
+      function markField(id, message) {
+        const field = document.getElementById(id);
+        if (field) {
+          field.style.borderColor = 'var(--color-error)';
+          const hint = field.parentElement.querySelector('.field-error');
+          if (hint) hint.remove();
+          const errEl = document.createElement('div');
+          errEl.className = 'field-error';
+          errEl.style.cssText = 'font-size:12px;color:var(--color-error-text);margin-top:4px';
+          errEl.textContent = message;
+          field.insertAdjacentElement('afterend', errEl);
+        }
+        hasError = true;
+      }
+      // Clear previous errors
+      document.querySelectorAll('.field-error').forEach(el => el.remove());
+      document.querySelectorAll('.modal input').forEach(el => el.style.borderColor = '');
+
+      if (!job.name) markField('jobName', 'Name is required');
+      if (durationSeconds <= 0) markField('jobDurS', 'Duration must be greater than 0');
+      if (!url && !urlPattern) {
+        markField('jobUrlPattern', 'Provide at least one: Tab Match or Open URL');
+        markField('jobUrl', 'Provide at least one: Tab Match or Open URL');
+      }
+      if (hasError) {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+        return;
+      }
+
+      const newConfig = JSON.parse(JSON.stringify(currentConfig));
+      if (editIndex >= 0) {
+        newConfig.jobs[editIndex] = job;
+      } else {
+        newConfig.jobs.push(job);
+      }
+
+      try {
+        await api('PUT', '/api/config', newConfig);
+        await fetchConfig();
+        closeModal(document.querySelector('.modal-backdrop'));
+        toast(editIndex >= 0 ? 'Job updated' : 'Job added', 'success');
+        renderJobs();
+        renderSettings();
+        await fetchJobStates();
+      } catch (err) {
+        toast(err.message, 'error');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+      }
+    }
+
+    async function deleteJob(index) {
+      const name = currentConfig.jobs[index].name;
+      showConfirmModal(`Delete job "${name}"?`, async () => {
+        const newConfig = JSON.parse(JSON.stringify(currentConfig));
+        newConfig.jobs.splice(index, 1);
+        if (newConfig.jobs.length === 0) {
+          toast('Cannot delete the last job', 'error');
+          throw new Error('Cannot delete last job');
+        }
+        await api('PUT', '/api/config', newConfig);
+        currentConfig = newConfig;
+        toast('Job deleted', 'success');
+        renderJobs();
+        renderSettings();
+        await fetchJobStates();
+      });
+    }
+
+    // Suggest fixes for common test failures
+    function getTestFixHint(stepName, message) {
+      const msg = message.toLowerCase();
+      if (stepName === 'Browser connection') {
+        if (msg.includes('econnrefused') || msg.includes('timed out') || msg.includes('cannot reach'))
+          return 'Make sure Chrome is running with remote debugging enabled, or launch it from the Settings tab.';
+      }
+      if (stepName === 'Find target page') {
+        if (msg.includes('no tab matches'))
+          return 'Open the target page in Chrome first, or switch to using Open URL instead of Tab Match.';
+      }
+      if (stepName === 'Recording probe') {
+        if (msg.includes('ffmpeg'))
+          return 'Ensure ffmpeg is installed and available on your system PATH.';
+      }
+      return '';
+    }
+
+    // Test modal
+    async function showTestModal(jobId) {
+      const job = currentConfig.jobs.find(j => j.id === jobId);
+      const displayName = job ? job.name : jobId;
+      const target = job ? (job.url || job.urlPattern || '') : '';
+      const schedule = job ? humanSchedule(job.schedule) : '';
+
+      // If modal already open (retest), reuse it; otherwise create new
+      let container = document.getElementById('testResults');
+      if (!container) {
+        let html = '<div class="modal-backdrop">';
+        html += '<div class="modal modal-test" role="dialog" aria-modal="true" aria-labelledby="modalTestTitle">';
+        html += '<div class="test-header">';
+        html += `<h3 id="modalTestTitle">${escapeHtml(displayName)}</h3>`;
+        if (target || schedule) {
+          html += '<div class="test-meta">';
+          if (target) html += `<span title="${escapeHtml(target)}">${escapeHtml(target)}</span>`;
+          if (schedule) html += `<span>${escapeHtml(schedule)}</span>`;
+          html += '</div>';
+        }
+        html += '</div>';
+        html += '<div id="testResults"></div>';
+        html += '</div></div>';
+        openModal(html);
+        container = document.getElementById('testResults');
+      }
+
+      // Loading state
+      container.innerHTML = '<div class="test-progress"><span class="spinner"></span><span class="test-progress-text">Running test\u2026</span></div>';
+
+      const _testStartTime = Date.now();
+
+      try {
+        const result = await api('POST', `/api/jobs/${encodeURIComponent(jobId)}/test`);
+        const elapsed = ((Date.now() - _testStartTime) / 1000).toFixed(1);
+        const icons = { pass: '\u2713', fail: '\u2717' };
+        const iconLabels = { pass: 'Passed', fail: 'Failed' };
+        const allPass = result.steps.every(s => s.status === 'pass');
+        const passCount = result.steps.filter(s => s.status === 'pass').length;
+        const total = result.steps.length;
+
+        let rhtml = '';
+
+        // Summary banner
+        if (allPass) {
+          rhtml += `<div class="test-summary pass"><span>All ${total} checks passed</span><span class="test-elapsed">${elapsed}s</span></div>`;
+        } else {
+          rhtml += `<div class="test-summary fail"><span>${passCount} of ${total} checks passed</span><span class="test-elapsed">${elapsed}s</span></div>`;
+        }
+
+        // Steps with staggered animation
+        rhtml += '<ul class="check-list">';
+        result.steps.forEach((step, i) => {
+          rhtml += `<li class="test-step-anim" style="animation-delay:${i * 80}ms">`;
+          rhtml += `<span class="check-icon ${step.status}" aria-label="${iconLabels[step.status]}">${icons[step.status]}</span>`;
+          rhtml += `<div><div>${escapeHtml(step.name)}</div>`;
+          if (step.message) rhtml += `<div class="check-detail">${escapeHtml(step.message)}</div>`;
+          if (step.status === 'fail') {
+            const hint = getTestFixHint(step.name, step.message || '');
+            if (hint) rhtml += `<div class="check-detail" style="color:var(--color-accent);margin-top:4px">How to fix: ${escapeHtml(hint)}</div>`;
+          }
+          rhtml += '</div></li>';
+        });
+        rhtml += '</ul>';
+
+        // Screenshot
+        if (result.screenshot && result.screenshot.startsWith('data:image/')) {
+          rhtml += `<img class="test-screenshot" src="${result.screenshot}" alt="Screenshot" onclick="toggleTestScreenshot(this)" title="Click to expand">`;
+        }
+
+        // Action buttons
+        rhtml += '<div class="test-actions">';
+        rhtml += `<button class="btn btn-ghost btn-sm" onclick="showTestModal('${escapeHtml(jobId)}')">Retest</button>`;
+        if (allPass) {
+          rhtml += `<button class="btn btn-primary btn-sm" onclick="handleTrigger('${escapeHtml(jobId)}', true);closeModal(this)">Trigger Recording</button>`;
+        }
+        rhtml += '<span class="test-actions-spacer"></span>';
+        rhtml += '<button class="btn btn-ghost btn-sm" onclick="closeModal(this)">Close</button>';
+        rhtml += '</div>';
+
+        container.innerHTML = rhtml;
+      } catch (err) {
+        const elapsed = ((Date.now() - _testStartTime) / 1000).toFixed(1);
+        let rhtml = `<div class="test-error-box">Test failed after ${elapsed}s: ${escapeHtml(err.message)}</div>`;
+        rhtml += '<div class="test-actions">';
+        rhtml += `<button class="btn btn-ghost btn-sm" onclick="showTestModal('${escapeHtml(jobId)}')">Retest</button>`;
+        rhtml += '<span class="test-actions-spacer"></span>';
+        rhtml += '<button class="btn btn-ghost btn-sm" onclick="closeModal(this)">Close</button>';
+        rhtml += '</div>';
+        container.innerHTML = rhtml;
+      }
+    }
+
+    function toggleTestScreenshot(img) {
+      img.classList.toggle('expanded');
+    }
+
+    // Trigger — with confirmation to prevent misclicks
+    async function handleTrigger(jobId, skipConfirm) {
+      const job = currentConfig.jobs.find(j => j.id === jobId);
+      const displayName = job ? job.name : jobId;
+      if (!skipConfirm) {
+        showConfirmModal(`Start recording "${displayName}"?`, async () => {
+          await doTrigger(jobId, displayName);
+        }, { confirmLabel: 'Record', confirmClass: 'btn-primary' });
+        return;
+      }
+      await doTrigger(jobId, displayName);
+    }
+
+    async function doTrigger(jobId, displayName) {
+      try {
+        await api('POST', `/api/jobs/${encodeURIComponent(jobId)}/trigger`);
+        toast(`Recording triggered for "${displayName}"`, 'success');
+        setTimeout(fetchJobStates, 1000);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // Stop recording by instance id
+    async function handleStop(instanceId) {
+      try {
+        await api('POST', `/api/recordings/active/${encodeURIComponent(instanceId)}/stop`);
+        toast('Recording stopped', 'success');
+        setTimeout(fetchActiveRecordings, 500);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // Stop all active recordings
+    async function handleStopAll() {
+      try {
+        const result = await api('POST', '/api/recordings/active/stop-all');
+        toast(`Stopped ${result.stopped} recording(s)`, 'success');
+        setTimeout(fetchActiveRecordings, 500);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // Confirm modal
+    function showConfirmModal(message, onConfirm, opts) {
+      const confirmLabel = (opts && opts.confirmLabel) || 'Delete';
+      const confirmClass = (opts && opts.confirmClass) || 'btn-danger';
+      let html = '<div class="modal-backdrop">';
+      html += '<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="modalConfirmTitle" aria-describedby="modalConfirmMsg">';
+      html += `<h3 id="modalConfirmTitle">Confirm</h3>`;
+      html += `<p id="modalConfirmMsg" style="margin-bottom:16px">${escapeHtml(message)}</p>`;
+      html += '<div class="form-actions">';
+      html += '<button class="btn btn-ghost" onclick="closeModal(this)">Cancel</button>';
+      html += `<button class="btn ${confirmClass}" id="confirmBtn">${escapeHtml(confirmLabel)}</button>`;
+      html += '</div></div></div>';
+
+      openModal(html);
+      document.getElementById('confirmBtn').onclick = async () => {
+        const btn = document.getElementById('confirmBtn');
+        btn.disabled = true;
+        btn.textContent = confirmLabel === 'Delete' ? 'Deleting...' : 'Working...';
+        try {
+          await onConfirm();
+        } catch (err) {
+          toast(err.message, 'error');
+        } finally {
+          closeModal(btn);
+        }
+      };
+    }
+
+    // Player modal
+    function showPlayerModal(filename) {
+      // Clean up any existing player
+      if (_playerCurrentFilename) {
+        closePlayerModal();
+      }
+
+      _playerCurrentFilename = filename;
+
+      // Look up metadata from recordings[]
+      const rec = recordings.find(r => r.name === filename);
+      const recIdx = recordings.findIndex(r => r.name === filename);
+      const hasPrev = recIdx > 0;
+      const hasNext = recIdx >= 0 && recIdx < recordings.length - 1;
+
+      let html = '<div class="modal-backdrop" id="playerBackdrop" onclick="if(event.target===this)closePlayerModal()">';
+      html += '<div class="modal modal-player" role="dialog" aria-modal="true" aria-labelledby="modalPlayerTitle">';
+
+      // Header with filename and nav
+      html += '<div class="player-header">';
+      html += `<span class="player-filename" id="modalPlayerTitle" title="${escapeHtml(filename)}">${escapeHtml(filename)}</span>`;
+      html += '<div class="player-nav">';
+      html += `<button class="btn btn-ghost btn-sm" onclick="playerNavigate(-1)" ${hasPrev ? '' : 'disabled'} title="Previous recording">&larr; Prev</button>`;
+      html += `<button class="btn btn-ghost btn-sm" onclick="playerNavigate(1)" ${hasNext ? '' : 'disabled'} title="Next recording">Next &rarr;</button>`;
+      html += '</div></div>';
+
+      // Video container
+      html += '<div class="video-container">';
+      html += `<video id="playerVideo" controls autoplay muted src="/api/recordings/${encodeURIComponent(filename)}"></video>`;
+      html += '<div class="video-error" id="playerError" style="display:none">';
+      html += '<div class="video-error-icon">&#9888;</div>';
+      html += '<div>Failed to load video</div>';
+      html += `<div style="font-size:12px;opacity:0.7">${escapeHtml(filename)}</div>`;
+      html += '</div>';
+      html += '</div>';
+
+      // Speed controls
+      html += '<div class="speed-group">';
+      html += '<button class="speed-btn" onclick="setPlayerSpeed(0.5)">0.5x</button>';
+      html += '<button class="speed-btn active" onclick="setPlayerSpeed(1)">1x</button>';
+      html += '<button class="speed-btn" onclick="setPlayerSpeed(1.5)">1.5x</button>';
+      html += '<button class="speed-btn" onclick="setPlayerSpeed(2)">2x</button>';
+      html += '<button class="speed-btn" onclick="setPlayerSpeed(4)">4x</button>';
+      html += '</div>';
+
+      // Info row
+      html += '<div class="player-info">';
+      if (rec && rec.size) html += `<span>Size: ${formatBytes(rec.size)}</span>`;
+      if (rec && rec.modified) html += `<span>Date: ${formatDate(rec.modified)}</span>`;
+      html += '<span id="playerDuration">Duration: &mdash;</span>';
+      html += '</div>';
+
+      // Actions
+      html += '<div class="player-actions">';
+      html += `<a class="btn btn-ghost btn-sm" href="/api/recordings/${encodeURIComponent(filename)}" download>Download</a>`;
+      html += `<button class="btn btn-danger btn-sm" onclick="deleteRecordingFromPlayer('${escapeHtml(filename)}')">Delete</button>`;
+      html += '<button class="btn btn-ghost btn-sm" onclick="closePlayerModal()">Close</button>';
+      html += '</div>';
+
+      // Keyboard shortcuts hint
+      html += '<div class="player-shortcuts-hint">';
+      html += '<span><kbd>Space</kbd> play/pause</span>';
+      html += '<span><kbd>&larr;</kbd><kbd>&rarr;</kbd> seek &plusmn;5s</span>';
+      html += '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> volume</span>';
+      html += '<span><kbd>F</kbd> fullscreen</span>';
+      html += '<span><kbd>,</kbd><kbd>.</kbd> frame step</span>';
+      html += '<span><kbd>Esc</kbd> close</span>';
+      html += '</div>';
+
+      html += '</div></div>';
+
+      openModal(html);
+
+      // Wire up video events
+      const video = document.getElementById('playerVideo');
+      if (video) {
+        video.addEventListener('loadedmetadata', () => {
+          const durEl = document.getElementById('playerDuration');
+          if (durEl && video.duration && isFinite(video.duration)) {
+            durEl.textContent = 'Duration: ' + formatDuration(Math.round(video.duration));
+          }
+        });
+        video.addEventListener('error', () => {
+          const errEl = document.getElementById('playerError');
+          if (errEl) errEl.style.display = 'flex';
+        });
+      }
+
+      // Install keyboard handler
+      _playerKeyHandler = handlePlayerKeydown;
+      document.addEventListener('keydown', _playerKeyHandler);
+    }
+
+    function closePlayerModal() {
+      if (_playerKeyHandler) {
+        document.removeEventListener('keydown', _playerKeyHandler);
+        _playerKeyHandler = null;
+      }
+      _playerCurrentFilename = null;
+      const backdrop = document.getElementById('playerBackdrop');
+      if (backdrop) closeModal(backdrop);
+    }
+
+    function setPlayerSpeed(speed) {
+      const video = document.getElementById('playerVideo');
+      if (video) video.playbackRate = speed;
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.classList.toggle('active', parseFloat(btn.textContent) === speed);
+      });
+    }
+
+    function playerNavigate(direction) {
+      if (!_playerCurrentFilename) return;
+      const idx = recordings.findIndex(r => r.name === _playerCurrentFilename);
+      if (idx === -1) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= recordings.length) return;
+      showPlayerModal(recordings[newIdx].name);
+    }
+
+    function deleteRecordingFromPlayer(filename) {
+      showConfirmModal(`Delete recording "${filename}"?`, async () => {
+        await api('DELETE', `/api/recordings/${encodeURIComponent(filename)}`);
+        toast('Recording deleted', 'success');
+        await fetchRecordings();
+
+        // Navigate to next or prev, or close if none remain
+        const idx = recordings.findIndex(r => r.name === filename);
+        if (recordings.length === 0) {
+          closePlayerModal();
+        } else if (idx >= 0 && idx < recordings.length) {
+          showPlayerModal(recordings[idx].name);
+        } else if (recordings.length > 0) {
+          showPlayerModal(recordings[recordings.length - 1].name);
+        } else {
+          closePlayerModal();
+        }
+      });
+    }
+
+    function handlePlayerKeydown(e) {
+      const video = document.getElementById('playerVideo');
+      if (!video || !_playerCurrentFilename) return;
+
+      // Don't intercept if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          if (video.paused) video.play(); else video.pause();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          video.currentTime = Math.max(0, video.currentTime - 5);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          video.currentTime = Math.min(video.duration || 0, video.currentTime + 5);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            video.requestFullscreen().catch(() => {});
+          }
+          break;
+        case ',':
+          e.preventDefault();
+          if (video.paused) video.currentTime = Math.max(0, video.currentTime - 0.1);
+          break;
+        case '.':
+          e.preventDefault();
+          if (video.paused) video.currentTime = Math.min(video.duration || 0, video.currentTime + 0.1);
+          break;
+        case 'Escape':
+          e.preventDefault();
+          e.stopPropagation();
+          closePlayerModal();
+          break;
+      }
+    }
+
+    // Delete recording
+    async function deleteRecording(filename) {
+      showConfirmModal(`Delete recording "${filename}"?`, async () => {
+        await api('DELETE', `/api/recordings/${encodeURIComponent(filename)}`);
+        toast('Recording deleted', 'success');
+        await fetchRecordings();
+      });
+    }
+
+    // Save settings
+    async function saveSettings(e) {
+      e.preventDefault();
+      const settingsBtn = e.target.querySelector('button[type="submit"]');
+      if (settingsBtn) { settingsBtn.disabled = true; settingsBtn.textContent = 'Saving...'; }
+      const mode = document.getElementById('settingMode').value;
+      const newConfig = JSON.parse(JSON.stringify(currentConfig));
+
+      if (mode === 'connect') {
+        newConfig.browserURL = document.getElementById('settingBrowserURL').value.trim();
+        const chromePath = document.getElementById('settingChromePath').value.trim();
+        if (chromePath) {
+          newConfig.chromePath = chromePath;
+        } else {
+          delete newConfig.chromePath;
+        }
+        delete newConfig.executablePath;
+        delete newConfig.headless;
+      } else {
+        newConfig.executablePath = document.getElementById('settingExecPath').value.trim();
+        newConfig.headless = document.getElementById('settingHeadless').value === 'true';
+        delete newConfig.browserURL;
+      }
+
+      newConfig.outputDir = document.getElementById('settingOutputDir').value.trim();
+      newConfig.port = parseInt(document.getElementById('settingPort').value, 10);
+
+      try {
+        await api('PUT', '/api/config', newConfig);
+        currentConfig = newConfig;
+        toast('Settings saved', 'success');
+        renderSettings();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        if (settingsBtn) { settingsBtn.disabled = false; settingsBtn.textContent = 'Save Settings'; }
+      }
+    }
+
+    // Debug Chrome
+    async function handleLaunchChrome() {
+      const chromePath = document.getElementById('settingChromePath')?.value.trim() || '';
+      try {
+        await api('POST', '/api/debug-chrome/launch', { chromePath });
+        toast('Chrome launched', 'success');
+        fetchDebugChromeStatus();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function handleStopChrome() {
+      try {
+        await api('POST', '/api/debug-chrome/stop');
+        toast('Chrome stopped', 'success');
+        fetchDebugChromeStatus();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function fetchDebugChromeStatus() {
+      try {
+        const status = await api('GET', '/api/debug-chrome/status');
+        renderDebugChromeStatus(status);
+      } catch {
+        // Ignore — UI may not be rendered yet
+      }
+    }
+
+    async function handleSetViewport() {
+      const width = parseInt(document.getElementById('settingsViewportWidth').value, 10);
+      const height = parseInt(document.getElementById('settingsViewportHeight').value, 10);
+      if (!width || !height || width <= 0 || height <= 0) {
+        toast('Enter valid width and height', 'error');
+        return;
+      }
+      try {
+        const result = await api('POST', '/api/browser/set-viewport', { width, height });
+        toast(`Viewport set on ${result.pagesUpdated} page(s)`, 'success');
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // Render active recordings
+    function renderActiveRecordings() {
+      const el = document.getElementById('activeRecordingsTable');
+      const stopAllBtn = document.getElementById('stopAllBtn');
+
+      if (activeRecordingsList.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9898;</div><div class="empty-state-title">No active recordings</div><div class="empty-state-hint">Trigger a job or wait for the next scheduled run</div></div>';
+        if (stopAllBtn) stopAllBtn.style.display = 'none';
+      } else {
+        if (stopAllBtn) stopAllBtn.style.display = '';
+
+        let html = '<div class="job-cards">';
+        for (const rec of activeRecordingsList) {
+          const elapsed = Math.floor((Date.now() - new Date(rec.startedAt).getTime()) / 1000);
+          const filename = rec.outputPath.split(/[/\\]/).pop() || rec.id;
+          const pct = Math.min(100, Math.round((elapsed / rec.durationSeconds) * 100));
+
+          html += '<div class="job-card">';
+          html += '<div class="job-card-row">';
+          html += `<div class="job-card-name" style="flex:1">${escapeHtml(rec.jobName)} <span class="pill pill-recording"><span class="pulse-dot"></span> recording</span></div>`;
+          html += '<div class="job-card-meta" style="flex-shrink:0">';
+          html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Started</span><span class="job-card-meta-value">${formatDate(rec.startedAt)}</span></div>`;
+          html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Output</span><span class="job-card-meta-value mono" title="${escapeHtml(filename)}">${escapeHtml(filename)}</span></div>`;
+          html += '</div></div>';
+          html += '<div class="job-card-row">';
+          html += `<span class="recording-timer" data-started="${escapeHtml(rec.startedAt)}" data-duration="${rec.durationSeconds}">${formatDuration(elapsed)} / ${formatDuration(rec.durationSeconds)}</span>`;
+          html += `<div class="progress-bar" style="flex:1"><div class="progress-bar-fill" style="width:${pct}%" data-started="${escapeHtml(rec.startedAt)}" data-duration="${rec.durationSeconds}"></div></div>`;
+          html += `<button class="btn btn-danger btn-sm" onclick="handleStop('${escapeHtml(rec.id)}')">Stop</button>`;
+          html += '</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+        el.innerHTML = html;
+      }
+
+      // Update active tab badge count
+      const activeTab = document.getElementById('tab-active');
+      if (activeTab) {
+        activeTab.textContent = activeRecordingsList.length > 0
+          ? `Active (${activeRecordingsList.length})`
+          : 'Active';
+      }
+    }
+
+    // Render completed recordings
+    function renderCompletedRecordings() {
+      const el = document.getElementById('completedRecordingsTable');
+
+      if (completedRecordingsList.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9201;</div><div class="empty-state-title">No recently completed recordings</div><div class="empty-state-hint">Completed recordings from this session will show here</div></div>';
+        return;
+      }
+
+      const shown = completedRecordingsList.slice(0, 20);
+
+      let html = '<div class="job-cards">';
+      for (const rec of shown) {
+        const filename = rec.outputPath.split(/[/\\]/).pop() || rec.id;
+        let resultPill;
+        if (rec.status === 'success') {
+          resultPill = '<span class="pill pill-success">success</span>';
+        } else {
+          resultPill = `<span class="pill pill-error pill-clickable" onclick="showErrorModal('${escapeHtml(rec.jobName)}', this.dataset.error)" data-error="${escapeHtml(rec.error || 'Unknown error')}" title="Click to view error">&#9888; error</span>`;
+        }
+
+        html += '<div class="job-card">';
+        html += '<div class="job-card-row">';
+        html += `<div class="job-card-name" style="flex:1">${escapeHtml(rec.jobName)} ${resultPill}</div>`;
+        html += '<div class="job-card-meta" style="flex-shrink:0">';
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Started</span><span class="job-card-meta-value">${formatDate(rec.startedAt)}</span></div>`;
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Output</span><span class="job-card-meta-value mono" title="${escapeHtml(filename)}">${escapeHtml(filename)}</span></div>`;
+        html += '</div></div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    // Fetch helpers
+    async function fetchConfig() {
+      currentConfig = await api('GET', '/api/config');
+    }
+
+    async function fetchJobStates() {
+      jobStates = await api('GET', '/api/jobs');
+      renderJobs();
+    }
+
+    async function fetchActiveRecordings() {
+      try {
+        const [active, completed] = await Promise.all([
+          api('GET', '/api/recordings/active'),
+          api('GET', '/api/recordings/completed'),
+        ]);
+        activeRecordingsList = active;
+        completedRecordingsList = completed;
+        renderActiveRecordings();
+        renderCompletedRecordings();
+      } catch {
+        // Ignore — endpoint may not be available yet
+      }
+    }
+
+    async function fetchRecordings() {
+      const data = await api('GET', '/api/recordings');
+      const recJson = JSON.stringify(data);
+      if (recJson === _prevRecordingsJson) return;
+      _prevRecordingsJson = recJson;
+      recordings = data;
+      renderRecordings();
+    }
+
+    async function fetchStatus() {
+      statusData = await api('GET', '/api/status');
+      renderStatus();
+    }
+
+    // Consolidated dashboard fetch (single request for jobs, active, completed, status, debugChrome)
+    async function fetchDashboard() {
+      try {
+        const d = await api('GET', '/api/dashboard');
+        const dashJson = JSON.stringify(d);
+        if (dashJson === _prevDashboardJson) return;
+        _prevDashboardJson = dashJson;
+
+        jobStates = d.jobs;
+        activeRecordingsList = d.active;
+        completedRecordingsList = d.completed;
+        statusData = d.status;
+        renderJobs();
+        renderActiveRecordings();
+        renderCompletedRecordings();
+        renderStatus();
+        renderDebugChromeStatus(d.debugChrome);
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        showDisconnected();
+      }
+    }
+
+    async function fetchAll() {
+      try {
+        await Promise.all([fetchConfig(), fetchDashboard(), fetchRecordings()]);
+        renderSettings();
+      } catch (err) {
+        console.error('Fetch error:', err);
+        showDisconnected();
+      }
+    }
+
+    // Utility
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+      return (bytes / 1073741824).toFixed(1) + ' GB';
+    }
+
+    function formatDuration(seconds) {
+      if (seconds < 60) return seconds + 's';
+      if (seconds < 3600) return Math.floor(seconds / 60) + 'm ' + (seconds % 60) + 's';
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return h + 'h ' + m + 'm';
+    }
+
+    function humanSchedule(cron) {
+      const parts = (cron || '').trim().split(/\s+/);
+      if (parts.length !== 5) return cron;
+      const [min, hr, dom, mon, dow] = parts;
+      const everyMin = min.match(/^\*\/(\d+)$/);
+      if (everyMin && hr === '*' && dom === '*' && mon === '*' && dow === '*')
+        return 'Every ' + everyMin[1] + 'm';
+      const everyHr = hr.match(/^\*\/(\d+)$/);
+      if (/^\d+$/.test(min) && everyHr && dom === '*' && mon === '*' && dow === '*')
+        return 'Every ' + everyHr[1] + 'h at :' + min.padStart(2, '0');
+      if (/^\d+$/.test(min) && hr === '*' && dom === '*' && mon === '*' && dow === '*')
+        return 'Hourly at :' + min.padStart(2, '0');
+      if (/^\d+$/.test(min) && /^\d+$/.test(hr) && dom === '*' && mon === '*' && dow === '*')
+        return 'Daily ' + hr.padStart(2, '0') + ':' + min.padStart(2, '0');
+      if (/^\d+$/.test(min) && /^\d+$/.test(hr) && dom === '*' && mon === '*' && /^\d+$/.test(dow)) {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return days[dow] + ' ' + hr.padStart(2, '0') + ':' + min.padStart(2, '0');
+      }
+      return cron;
+    }
+
+    function formatDate(isoString) {
+      const d = new Date(isoString);
+      return d.toLocaleString();
+    }
+
+    function formatCountdown(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      if (m >= 60) {
+        const h = Math.floor(m / 60);
+        const rm = m % 60;
+        return h + 'h ' + rm + 'm';
+      }
+      return m + 'm ' + String(s).padStart(2, '0') + 's';
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML.replace(/'/g, '&#39;');
+    }
+
+    // Update recording timers and progress bars every second
+    setInterval(() => {
+      document.querySelectorAll('.recording-timer').forEach(el => {
+        const started = el.getAttribute('data-started');
+        const duration = parseInt(el.getAttribute('data-duration'), 10);
+        if (!started) return;
+        const elapsed = Math.floor((Date.now() - new Date(started).getTime()) / 1000);
+        el.textContent = formatDuration(elapsed) + ' / ' + formatDuration(duration);
+      });
+      document.querySelectorAll('.progress-bar-fill').forEach(el => {
+        const started = el.getAttribute('data-started');
+        const duration = parseInt(el.getAttribute('data-duration'), 10);
+        if (!started || !duration) return;
+        const elapsed = Math.floor((Date.now() - new Date(started).getTime()) / 1000);
+        el.style.width = Math.min(100, Math.round((elapsed / duration) * 100)) + '%';
+      });
+      // Tick countdown pills
+      document.querySelectorAll('.pill-countdown').forEach(el => {
+        const next = el.getAttribute('data-next');
+        if (!next) return;
+        const ms = new Date(next).getTime() - Date.now();
+        if (ms <= 0) {
+          el.className = 'pill pill-idle';
+          el.textContent = 'idle';
+        } else {
+          el.innerHTML = '&#9201; ' + formatCountdown(ms);
+        }
+      });
+    }, 1000);
+
+    // Init with retry
+    async function initWithRetry(maxAttempts = 3) {
+      for (let i = 0; i < maxAttempts; i++) {
+        try {
+          await fetchAll();
+          return;
+        } catch {
+          if (i < maxAttempts - 1) {
+            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+          }
+        }
+      }
+      showDisconnected();
+    }
+    initWithRetry();
+    setInterval(fetchDashboard, 5000);
+    setInterval(fetchRecordings, 30000);
+  </script>
+</body>
+</html>
