@@ -6,6 +6,7 @@ import { record, makeTimestamp } from './recorder.js';
 export interface JobState {
   id: string;
   name: string;
+  enabled: boolean;
   schedule: string | null;
   nextRun: string | null;
   lastRun: string | null;
@@ -87,6 +88,7 @@ export function startScheduler(config: AppConfig): void {
     const state: JobState = {
       id: job.id!,
       name: job.name,
+      enabled: job.enabled !== false,
       schedule: job.schedule ?? null,
       nextRun: null,
       lastRun: null,
@@ -94,6 +96,11 @@ export function startScheduler(config: AppConfig): void {
       lastError: null,
     };
     jobStates.set(job.id!, state);
+
+    if (job.enabled === false) {
+      console.log(`Job "${job.name}" is disabled`);
+      continue;
+    }
 
     if (!job.schedule) {
       console.log(`Job "${job.name}" has no schedule (manual only)`);
@@ -143,6 +150,9 @@ export function triggerJob(config: AppConfig, jobId: string): { triggered: boole
   if (!job) {
     console.error(`Cannot trigger: job id "${jobId}" not found`);
     return { triggered: false, reason: 'Job not found' };
+  }
+  if (job.enabled === false) {
+    return { triggered: false, reason: `Job "${job.name}" is disabled` };
   }
   // Prevent overlap: check if this job already has an active recording
   for (const [, entry] of activeRecordings) {

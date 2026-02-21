@@ -1665,6 +1665,59 @@
       100% { background-position: -200% 0; }
     }
 
+    .job-card--disabled {
+      opacity: 0.5;
+    }
+
+    .job-card--disabled .job-card-footer .btn:not(.toggle-btn) {
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+      -webkit-app-region: no-drag;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--color-border);
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--color-text);
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--color-accent);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(16px);
+    }
+
     .empty-state-action {
       margin-top: 16px;
     }
@@ -2274,19 +2327,21 @@
         const nextRun = state && state.nextRun ? formatDate(state.nextRun) : '\u2014';
         const idx = currentConfig.jobs.findIndex(j => j.id === job.id);
 
-        html += '<div class="job-card">';
+        const isDisabled = job.enabled === false;
+        html += `<div class="job-card${isDisabled ? ' job-card--disabled' : ''}">`;
         html += '<div class="job-card-header">';
         html += `<div class="job-card-name" title="${escapeHtml(job.name)}">${escapeHtml(job.name)}</div>`;
-        html += statusHtml;
+        html += isDisabled ? '<span class="pill pill-idle">disabled</span>' : statusHtml;
         html += '</div>';
         html += '<div class="job-card-row">';
         html += '<div class="job-card-meta">';
         html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Target</span><span class="job-card-meta-value mono" title="${escapeHtml(target)}">${escapeHtml(target)}</span></div>`;
         html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Schedule</span><span class="job-card-meta-value" title="${escapeHtml(job.schedule || 'Manual')}">${job.schedule ? escapeHtml(humanSchedule(job.schedule)) : 'Manual'}</span></div>`;
         html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Duration</span><span class="job-card-meta-value">${duration}</span></div>`;
-        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Next Run</span><span class="job-card-meta-value">${nextRun}</span></div>`;
+        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Next Run</span><span class="job-card-meta-value">${isDisabled ? '\u2014' : nextRun}</span></div>`;
         html += '</div></div>';
         html += '<div class="job-card-footer">';
+        html += `<label class="toggle-switch toggle-btn" title="${isDisabled ? 'Enable' : 'Disable'} job"><input type="checkbox" ${isDisabled ? '' : 'checked'} onchange="toggleJob('${escapeHtml(job.id)}')"><span class="toggle-slider"></span></label>`;
         html += `<button class="btn btn-ghost btn-sm" onclick="showTestModal('${escapeHtml(job.id)}')">Test</button>`;
         html += `<button class="btn btn-ghost btn-sm" onclick="handleTrigger('${escapeHtml(job.id)}')">Trigger</button>`;
         html += `<button class="btn btn-ghost btn-sm" onclick="showJobModal(${idx})">Edit</button>`;
@@ -2863,6 +2918,7 @@
 
       if (editIndex >= 0) {
         job.id = currentConfig.jobs[editIndex].id;
+        job.enabled = currentConfig.jobs[editIndex].enabled;
       }
 
       const url = document.getElementById('jobUrl').value.trim();
@@ -2919,6 +2975,17 @@
       } catch (err) {
         toast(err.message, 'error');
         if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+      }
+    }
+
+    async function toggleJob(jobId) {
+      try {
+        await api('POST', `/api/jobs/${jobId}/toggle`);
+        await fetchConfig();
+        renderJobs();
+        await fetchJobStates();
+      } catch (err) {
+        toast(err.message, 'error');
       }
     }
 

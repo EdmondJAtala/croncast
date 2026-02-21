@@ -7,6 +7,7 @@ export interface JobConfig {
   url?: string;
   urlPattern?: string;
   schedule?: string;
+  enabled?: boolean;
   durationSeconds: number;
   captureFps?: number;
   viewportWidth?: number;
@@ -102,6 +103,10 @@ export function validateConfig(raw: unknown): AppConfig {
       throw new ConfigError(`Job "${j.name}": urlPattern must be a string`);
     }
 
+    if (j.enabled !== undefined && typeof j.enabled !== 'boolean') {
+      throw new ConfigError(`Job "${j.name}": enabled must be a boolean`);
+    }
+
     if (j.captureFps !== undefined) {
       if (typeof j.captureFps !== 'number' || j.captureFps < 1 || j.captureFps > 30) {
         throw new ConfigError(`Job "${j.name}": captureFps must be a number between 1 and 30`);
@@ -130,6 +135,7 @@ export function validateConfig(raw: unknown): AppConfig {
       url: j.url as string | undefined,
       urlPattern: j.urlPattern as string | undefined,
       schedule: j.schedule as string | undefined,
+      enabled: j.enabled !== false,
       durationSeconds: j.durationSeconds as number,
       captureFps: j.captureFps as number | undefined,
       viewportWidth: j.viewportWidth as number | undefined,

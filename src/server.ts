@@ -118,6 +118,23 @@ export function createServer(config: AppConfig, configPath: string): express.Exp
     res.json({ ok: true, message: `Recording triggered for "${job.name}"` });
   });
 
+  // POST /api/jobs/:id/toggle
+  app.post('/api/jobs/:id/toggle', async (req, res) => {
+    const job = config.jobs.find(j => j.id === req.params.id);
+    if (!job) {
+      res.status(404).json({ error: `Job "${req.params.id}" not found` });
+      return;
+    }
+    job.enabled = job.enabled === false ? true : false;
+    try {
+      await saveConfig(configPath, config);
+      restartScheduler(config);
+      res.json({ ok: true, enabled: job.enabled });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
   // GET /api/recordings/active
   app.get('/api/recordings/active', (_req, res) => {
     res.json(getActiveRecordings());
