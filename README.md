@@ -1,39 +1,29 @@
 # croncast
 
-Automated browser tab video recording on a cron schedule. croncast captures any browser tab as an MP4 video using screenshots piped through ffmpeg, controlled via a web dashboard and scheduled with cron expressions.
-
-## Prerequisites
-
-- **Node.js 18+**
-- **Google Chrome** (or Chromium-based browser)
-- **ffmpeg** — must be installed and available on your PATH
+Automated browser tab video recording on a cron schedule. croncast captures any browser tab as an MP4 video using screenshots piped through ffmpeg, controlled via a built-in dashboard and scheduled with cron expressions. Runs as a native Windows desktop app via Electron.
 
 ## Quick Start
 
+### Running in dev
+
 ```bash
-# Install dependencies
 npm install
-
-# Build
-npm run build
-
-# Start — copies config.default.json to config.json on first run
-npm start
+npm run start:electron
 ```
 
-Edit `config.json` to match your setup. This file is gitignored so your local settings stay private.
+This builds both the main app and the Electron wrapper, then launches the desktop window.
 
-Open **http://localhost:3000** to access the dashboard. From there you can configure your browser connection, create recording jobs, and test the pipeline.
-
-To use a different config file:
+### Building an installer
 
 ```bash
-node dist/index.js path/to/config.json
+npm run dist
 ```
+
+Produces an NSIS installer in `release/`. The installer is Windows x64 only.
 
 ## Configuration
 
-croncast uses a JSON config file (`config.json` by default).
+croncast uses a JSON config file stored in `%APPDATA%/croncast/config.json` (copied from `config.default.json` on first run).
 
 ### Minimal config (connect mode)
 
@@ -41,7 +31,6 @@ croncast uses a JSON config file (`config.json` by default).
 {
   "browserURL": "http://localhost:9222",
   "outputDir": "./recordings",
-  "port": 3000,
   "jobs": [
     {
       "name": "My Recording",
@@ -61,9 +50,10 @@ croncast uses a JSON config file (`config.json` by default).
 | `browserURL` | string | `http://localhost:9222` | Chrome DevTools Protocol URL (connect mode) |
 | `executablePath` | string | — | Path to Chrome executable (launch mode) |
 | `chromePath` | string | — | Chrome path for the built-in debug launcher |
+| `autoLaunchChrome` | boolean | `false` | Auto-launch debug Chrome on startup |
 | `headless` | boolean | `false` | Run launched browser headless |
 | `outputDir` | string | `./recordings` | Directory for MP4 output |
-| `port` | number | `3000` | Web UI port |
+| `minimizeToTray` | boolean | `true` | Minimize to system tray on close instead of quitting |
 | `jobs` | array | — | Recording job definitions (see below) |
 
 ### Job config
@@ -83,50 +73,31 @@ croncast uses a JSON config file (`config.json` by default).
 
 croncast supports two ways to control the browser:
 
-- **Connect mode** (default): Connects to an already-running Chrome instance via the DevTools Protocol. Set `browserURL` in config. You can start Chrome yourself with `--remote-debugging-port=9222`, or use the built-in debug launcher from the dashboard Settings tab.
+- **Connect mode** (default): Connects to an already-running Chrome instance via the DevTools Protocol. Set `browserURL` in config. You can configure a Chrome path in Settings and enable auto-launch to have croncast start Chrome for you.
 
-- **Launch mode**: croncast launches and manages its own Chrome instance. Set `executablePath` to your Chrome binary path. Useful for headless or server deployments.
+- **Launch mode**: croncast launches and manages its own Chrome instance. Set `executablePath` to your Chrome binary path. Useful for headless or automated deployments.
 
 Only one mode can be active — `browserURL` and `executablePath` are mutually exclusive.
 
-## Web Dashboard
+## Dashboard
 
-The dashboard at `http://localhost:{port}` provides:
+The built-in dashboard provides:
 
 - **Jobs** — Create, edit, test, and trigger recording jobs
 - **Monitor** — Live view of active and completed recordings
 - **Recordings** — Browse, play, and manage saved MP4 files
-- **Settings** — Configure browser connection, Chrome launcher, and app settings
+- **Settings** — Configure browser connection, output directory, theme, and tray behavior
 
-## Desktop App (Electron)
+## How It Works
 
-croncast can also run as a native Windows desktop app via Electron. This bundles ffmpeg and provides auto-updates from GitHub Releases.
-
-### Running in dev
-
-```bash
-npm run start:electron
-```
-
-This builds both the main app and the Electron wrapper, then launches the desktop window.
-
-### Building an installer
-
-```bash
-npm run dist
-```
-
-Produces an NSIS installer in `release/`. The installer is Windows x64 only.
-
-### How it works
-
-- Electron's main process runs the same startup sequence as standalone mode (config, preflight, scheduler, Express server)
+- Electron's main process runs the Express server in-process (config, preflight, scheduler, server)
 - A frameless BrowserWindow loads the dashboard from `http://127.0.0.1:{port}`
-- Config is stored in `%APPDATA%/croncast/config.json` (copied from `config.default.json` on first run)
-- ffmpeg is bundled via `ffmpeg-static` — no PATH dependency when running the desktop app
+- Config is stored in `%APPDATA%/croncast/config.json`
+- ffmpeg is bundled via `ffmpeg-static` — no PATH dependency
+- Closing the window minimizes to the system tray (configurable in Settings)
 - Auto-updates are handled by `electron-updater` from GitHub Releases
 
-### Releasing
+## Releasing
 
 Push a version tag to trigger the GitHub Actions release workflow:
 
