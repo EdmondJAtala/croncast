@@ -19,8 +19,11 @@ export interface AppConfig {
   executablePath?: string;
   headless?: boolean;
   chromePath?: string;
+  autoLaunchChrome?: boolean;
   outputDir: string;
-  port: number;
+  port?: number;
+  dismissedChecks?: string[];
+  minimizeToTray?: boolean;
   jobs: JobConfig[];
 }
 
@@ -63,10 +66,6 @@ export function validateConfig(raw: unknown): AppConfig {
 
   if (obj.outputDir !== undefined && typeof obj.outputDir !== 'string') {
     throw new ConfigError('outputDir must be a string');
-  }
-
-  if (obj.port !== undefined && (typeof obj.port !== 'number' || obj.port <= 0)) {
-    throw new ConfigError('port must be a positive number');
   }
 
   if (!Array.isArray(obj.jobs) || obj.jobs.length === 0) {
@@ -128,7 +127,6 @@ export function validateConfig(raw: unknown): AppConfig {
 
   const config: AppConfig = {
     outputDir: typeof obj.outputDir === 'string' ? obj.outputDir : './recordings',
-    port: typeof obj.port === 'number' ? obj.port : 3000,
     jobs: (obj.jobs as Record<string, unknown>[]).map(j => ({
       id: typeof j.id === 'string' && j.id.length > 0 ? j.id : Math.random().toString(36).slice(2, 10),
       name: j.name as string,
@@ -145,6 +143,20 @@ export function validateConfig(raw: unknown): AppConfig {
 
   if (obj.chromePath) {
     config.chromePath = obj.chromePath as string;
+  }
+
+  if (typeof obj.autoLaunchChrome === 'boolean') {
+    config.autoLaunchChrome = obj.autoLaunchChrome;
+  }
+
+  if (Array.isArray(obj.dismissedChecks)) {
+    config.dismissedChecks = (obj.dismissedChecks as unknown[]).filter(
+      (v): v is string => typeof v === 'string'
+    );
+  }
+
+  if (typeof obj.minimizeToTray === 'boolean') {
+    config.minimizeToTray = obj.minimizeToTray;
   }
 
   if (obj.executablePath !== undefined) {

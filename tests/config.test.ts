@@ -155,11 +155,6 @@ describe('validateConfig', () => {
     assert.equal(config.outputDir, './recordings');
   });
 
-  it('applies default port', () => {
-    const config = validateConfig(connectConfig());
-    assert.equal(config.port, 3000);
-  });
-
   it('applies default browserURL when neither browserURL nor executablePath is set', () => {
     const config = validateConfig({
       jobs: [{ name: 'j', url: 'http://x', schedule: '* * * * *', durationSeconds: 1 }],

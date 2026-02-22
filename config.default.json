@@ -1,6 +1,5 @@
 {
   "outputDir": "./recordings",
-  "port": 3000,
   "browserURL": "http://localhost:9222",
   "jobs": [
     {

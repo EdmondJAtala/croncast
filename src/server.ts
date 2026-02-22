@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AppConfig, validateConfig, saveConfig } from './config.js';
-import { getPreflightResults } from './preflight.js';
+import { getPreflightResults, runPreflightChecks } from './preflight.js';
 import { getJobStates, restartScheduler, triggerJob, getActiveRecordings, getCompletedRecordings, stopRecording, stopAllRecordings } from './scheduler.js';
 import { testJob, setViewportOnAll } from './recorder.js';
 import { launchDebugChrome, stopDebugChrome, getDebugChromeStatus, parsePortFromURL } from './chrome-launcher.js';
@@ -53,6 +53,16 @@ export function createServer(config: AppConfig, configPath: string): express.Exp
       mode: config.executablePath ? 'launch' : 'connect',
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
+  });
+
+  // POST /api/preflight/recheck
+  app.post('/api/preflight/recheck', async (_req, res) => {
+    try {
+      const results = await runPreflightChecks(config);
+      res.json(results);
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
   });
 
   // GET /api/config
@@ -306,6 +316,7 @@ export function createServer(config: AppConfig, configPath: string): express.Exp
       completed: getCompletedRecordings(),
       status: {
         preflight: getPreflightResults(),
+        dismissedChecks: config.dismissedChecks || [],
         uptime: Math.floor((Date.now() - startTime) / 1000),
         mode: config.executablePath ? 'launch' : 'connect',
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
