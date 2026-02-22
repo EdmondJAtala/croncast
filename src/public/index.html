@@ -77,8 +77,8 @@
 
     /* Scrollbars */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 5px;
+      height: 5px;
     }
 
     ::-webkit-scrollbar-track {
@@ -87,20 +87,17 @@
 
     ::-webkit-scrollbar-thumb {
       background: var(--color-border);
-      border-radius: 4px;
+      border-radius: 5px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
       background: var(--color-text-secondary);
     }
 
-    ::-webkit-scrollbar-corner {
-      background: transparent;
-    }
-
-    html {
-      scrollbar-color: var(--color-border) transparent;
-      scrollbar-width: thin;
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
     }
 
     body {
@@ -108,13 +105,20 @@
       background: var(--color-bg);
       color: var(--color-text);
       line-height: 1.6;
-      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 16px 24px;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     header {
@@ -124,6 +128,9 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 16px 16px;
+      flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     /* Electron frameless: header becomes the draggable titlebar */
@@ -135,11 +142,12 @@
     }
 
     body.electron-app .container {
-      padding-top: 8px;
+      padding-top: 4px;
     }
 
     body.electron-app header button,
-    body.electron-app header .connection-badge {
+    body.electron-app header .connection-badge,
+    body.electron-app header #healthBadge {
       -webkit-app-region: no-drag;
     }
 
@@ -209,8 +217,12 @@
     .connection-badge {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       padding: 4px 12px;
+      min-height: 26px;
+      min-width: 26px;
+      box-sizing: border-box;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 500;
@@ -449,6 +461,7 @@
       max-width: 640px;
       max-height: 80vh;
       overflow-y: auto;
+      overflow-x: hidden;
       animation: slideUp 200ms;
       box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -708,14 +721,17 @@
 
     .check-list {
       list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
     .check-list li {
       padding: 8px 0;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       font-size: 14px;
+      min-width: 0;
     }
 
     .check-icon {
@@ -741,7 +757,58 @@
       border-radius: 4px;
       font-family: var(--font-mono);
       font-size: 11px;
+      word-break: break-word;
     }
+
+    .check-menu-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .check-menu-btn {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+      transition: background 150ms, color 150ms;
+    }
+    .check-menu-btn:hover { background: var(--color-hover); color: var(--color-text); }
+    .check-menu-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 4px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+      min-width: 130px;
+      overflow: hidden;
+    }
+    .check-menu-dropdown.open { display: block; }
+    .check-menu-dropdown button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--color-text);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .check-menu-dropdown button:hover { background: var(--color-hover); }
 
     .test-screenshot {
       max-width: 100%;
@@ -1201,9 +1268,10 @@
 
     .section-nav {
       display: flex;
-      gap: 0;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--color-border);
+      gap: 6px;
+      flex-shrink: 0;
+      padding: 0;
+      margin-bottom: 8px;
     }
 
     .section-nav button {
@@ -1212,23 +1280,31 @@
       font-weight: 500;
       font-family: var(--font-sans);
       background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
       color: var(--color-text-secondary);
       cursor: pointer;
       transition: all 150ms;
-      margin-bottom: -1px;
     }
 
     .section-nav button.active {
-      color: var(--color-accent);
-      border-bottom-color: var(--color-accent);
+      color: #fff;
+      background: var(--color-accent);
+      border-color: var(--color-accent);
       font-weight: 600;
     }
 
     .section-nav button:hover:not(.active) {
       color: var(--color-text);
       background: var(--color-row-hover);
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-bottom: 24px;
+      padding-right: 8px;
     }
 
     .section {
@@ -1274,26 +1350,30 @@
     /* Responsive: Tablet */
     @media (max-width: 768px) {
       .container {
-        padding: 16px 12px;
+        padding: 4px 12px;
       }
 
       header {
         flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 16px;
+        gap: 8px;
       }
 
       .section-nav {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        margin-bottom: 16px;
+        margin-bottom: 6px;
       }
       .section-nav::-webkit-scrollbar { display: none; }
 
+      .section-nav {
+        gap: 4px;
+        padding: 2px 0;
+      }
+
       .section-nav button {
         white-space: nowrap;
-        padding: 6px 10px;
+        padding: 4px 8px;
         font-size: 12px;
       }
 
@@ -1354,6 +1434,11 @@
     /* Responsive: Mobile */
     @media (max-width: 480px) {
       header h1 { font-size: 20px; }
+
+      .section-nav button {
+        padding: 3px 6px;
+        font-size: 11px;
+      }
 
       .card { padding: 12px; }
 
@@ -1462,6 +1547,10 @@
       padding: 20px;
     }
 
+    .settings-card > .form-group:last-child {
+      margin-bottom: 0;
+    }
+
     .settings-card-header {
       display: flex;
       align-items: flex-start;
@@ -1504,13 +1593,16 @@
       flex: 1;
     }
 
-    .settings-save-bar {
+    .modal-settings .settings-cards {
+      overflow-y: auto;
+      min-height: 0;
+      padding-right: 8px;
+    }
+
+    .modal-settings form {
       display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--color-border);
+      flex-direction: column;
+      min-height: 0;
     }
 
     /* Jobs page */
@@ -1518,7 +1610,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-top: 16px;
       margin-bottom: 12px;
+    }
+
+    .section > .section-page-header:first-child {
+      margin-top: 0;
     }
 
     .section-page-header h2 {
@@ -1646,7 +1743,7 @@
     }
 
     .job-card--skeleton {
-      height: 72px;
+      height: 140px;
       position: relative;
       overflow: hidden;
     }
@@ -1669,53 +1766,31 @@
       opacity: 0.5;
     }
 
-    .job-card--disabled .job-card-footer .btn:not(.toggle-btn) {
-      pointer-events: none;
-      opacity: 0.4;
-    }
 
-    .toggle-switch {
-      position: relative;
-      width: 36px;
-      height: 20px;
-      flex-shrink: 0;
+    .check-btn {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      transition: all 150ms;
+      color: var(--color-text-secondary);
       -webkit-app-region: no-drag;
     }
 
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
+    .check-btn:hover {
+      background: var(--color-row-hover);
     }
 
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background: var(--color-border);
-      border-radius: 10px;
-      transition: background 0.2s;
+    .check-btn.on {
+      color: var(--color-success, #22c55e);
+      border-color: var(--color-success, #22c55e);
     }
 
-    .toggle-slider::before {
-      content: '';
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      left: 3px;
-      bottom: 3px;
-      background: var(--color-text);
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-
-    .toggle-switch input:checked + .toggle-slider {
-      background: var(--color-accent);
-    }
-
-    .toggle-switch input:checked + .toggle-slider::before {
-      transform: translateX(16px);
+    .check-btn.off {
+      color: var(--color-text-secondary);
     }
 
     .empty-state-action {
@@ -1733,6 +1808,9 @@
     .modal-settings {
       width: min(640px, calc(100vw - 32px));
       max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .settings-modal-header {
@@ -1740,33 +1818,13 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
     }
 
     .settings-modal-header h3 {
       margin-bottom: 0;
       padding-bottom: 0;
       border-bottom: none;
-    }
-
-    .settings-modal-theme {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .settings-modal-theme span {
-      font-size: 11px;
-      color: var(--color-text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .debug-chrome-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .sr-only {
@@ -1808,6 +1866,10 @@
       <span class="header-subtitle">scheduled recordings</span>
     </div>
     <div class="header-actions">
+      <div class="connection-badge connecting" id="healthBadge" aria-live="polite" onclick="showStatusModal()" title="System health — click for details" style="display:none">
+        <div class="status-dot" id="healthDot" aria-hidden="true"></div>
+        <span id="healthText"></span>
+      </div>
       <div class="connection-badge connecting" id="connectionBadge" aria-live="polite" onclick="showStatusModal()" title="Click for system status">
         <div class="status-dot" id="statusDot" aria-hidden="true"></div>
         <span id="statusText">connecting</span>
@@ -1838,9 +1900,7 @@
         </div>
       </div>
       <div id="jobsTable">
-        <div class="job-card job-card--skeleton"></div>
-        <div class="job-card job-card--skeleton"></div>
-        <div class="job-card job-card--skeleton"></div>
+        <div class="job-cards"><div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div></div>
       </div>
     </div>
 
@@ -1850,27 +1910,26 @@
         <button class="btn btn-danger btn-sm" id="stopAllBtn" onclick="handleStopAll()" style="display:none">Stop All</button>
       </div>
       <div id="activeRecordingsTable">
-        <div class="job-card job-card--skeleton"></div>
-        <div class="job-card job-card--skeleton"></div>
+        <div class="job-cards"><div class="job-card job-card--skeleton"></div></div>
       </div>
       <div class="section-page-header" style="margin-top:24px">
         <h2>Recently Completed</h2>
       </div>
       <div id="completedRecordingsTable">
-        <div class="job-card job-card--skeleton"></div>
-        <div class="job-card job-card--skeleton"></div>
+        <div class="job-cards"><div class="job-card job-card--skeleton"></div></div>
       </div>
     </div>
 
     <div class="section" id="section-recordings" role="tabpanel" aria-labelledby="tab-recordings">
       <div class="section-page-header">
         <h2>Recordings</h2>
-        <span id="recSortBar"></span>
+        <div class="section-page-actions">
+          <span id="recSortBar"></span>
+          <button class="btn btn-ghost btn-sm" id="openRecDirBtn" style="display:none" onclick="openRecordingsDir()" title="Open recordings folder"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13V3a1 1 0 0 1 1-1h4l2 2h4a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg></button>
+        </div>
       </div>
       <div id="recordingsTable">
-        <div class="job-card job-card--skeleton"></div>
-        <div class="job-card job-card--skeleton"></div>
-        <div class="job-card job-card--skeleton"></div>
+        <div class="job-cards"><div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div></div>
       </div>
     </div>
 
@@ -1883,6 +1942,13 @@
     // Enable Electron frameless titlebar mode
     if (window.croncast) {
       document.body.classList.add('electron-app');
+      const openBtn = document.getElementById('openRecDirBtn');
+      if (openBtn) openBtn.style.display = '';
+    }
+
+    async function openRecordingsDir() {
+      if (!window.croncast || !currentConfig) return;
+      await window.croncast.openFolder(currentConfig.outputDir);
     }
 
     // Theme
@@ -2030,21 +2096,44 @@
     function onSettingsViewportWidthChange() { onViewportWidthChangeForIds(SETTINGS_VIEWPORT_IDS); }
 
     // Shared debug chrome status renderer
+    let _debugChromeRunning = false;
+
     function renderDebugChromeStatus(status) {
-      const btnLaunch = document.getElementById('btnLaunchChrome');
-      const btnStop = document.getElementById('btnStopChrome');
-      const statusEl = document.getElementById('debugChromeStatus');
-      if (!btnLaunch || !btnStop || !statusEl) return;
-      if (status.running) {
-        btnLaunch.style.display = 'none';
-        btnStop.style.display = '';
-        statusEl.textContent = `Running (pid: ${status.pid}, port: ${status.port})`;
-        statusEl.style.color = 'var(--color-success)';
+      _debugChromeRunning = status.running;
+      updateHeaderChromeBadge();
+    }
+
+    function updateHeaderChromeBadge() {
+      const badge = document.getElementById('connectionBadge');
+      const text = document.getElementById('statusText');
+      if (!badge || !text || !statusData) return;
+      if (statusData.mode !== 'connect') return;
+
+      if (_debugChromeRunning) {
+        badge.className = 'connection-badge';
+        text.textContent = 'Chrome';
+        badge.title = 'Chrome running — click to stop';
+        badge.onclick = handleHeaderChromeToggle;
       } else {
-        btnLaunch.style.display = '';
-        btnStop.style.display = 'none';
-        statusEl.textContent = 'Not running';
-        statusEl.style.color = 'var(--color-text-secondary)';
+        badge.className = 'connection-badge error';
+        text.textContent = 'Chrome';
+        badge.title = 'Chrome not running — click to launch';
+        badge.onclick = handleHeaderChromeToggle;
+      }
+    }
+
+    async function handleHeaderChromeToggle() {
+      if (_debugChromeRunning) {
+        await handleStopChrome();
+      } else {
+        // Use config chromePath directly (not from settings input)
+        try {
+          await api('POST', '/api/debug-chrome/launch', { chromePath: '' });
+          toast('Chrome launched', 'success');
+          fetchDebugChromeStatus();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
       }
     }
 
@@ -2254,7 +2343,7 @@
 
       // Loading state
       if (!currentConfig) {
-        el.innerHTML = '<div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div>';
+        el.innerHTML = '<div class="job-cards"><div class="job-card job-card--skeleton"></div><div class="job-card job-card--skeleton"></div></div>';
         return;
       }
 
@@ -2310,10 +2399,6 @@
         let statusHtml;
         if (activeCount > 0) {
           statusHtml = `<span class="pill pill-recording"><span class="pulse-dot"></span> recording${activeCount > 1 ? ' (' + activeCount + ')' : ''}</span>`;
-        } else if (state && state.lastResult === 'success') {
-          statusHtml = '<span class="pill pill-success">success</span>';
-        } else if (state && state.lastResult === 'error') {
-          statusHtml = `<span class="pill pill-error" title="${escapeHtml(state.lastError || '')}">error</span>`;
         } else if (state && state.nextRun) {
           const ms = new Date(state.nextRun).getTime() - Date.now();
           if (ms > 0 && ms <= 3600000) {
@@ -2328,23 +2413,30 @@
         const idx = currentConfig.jobs.findIndex(j => j.id === job.id);
 
         const isDisabled = job.enabled === false;
-        html += `<div class="job-card${isDisabled ? ' job-card--disabled' : ''}">`;
+        html += `<div class="job-card${isDisabled && job.schedule ? ' job-card--disabled' : ''}">`;
         html += '<div class="job-card-header">';
         html += `<div class="job-card-name" title="${escapeHtml(job.name)}">${escapeHtml(job.name)}</div>`;
-        html += isDisabled ? '<span class="pill pill-idle">disabled</span>' : statusHtml;
+        html += (isDisabled && job.schedule) ? '<span class="pill pill-idle">disabled</span>' : statusHtml;
         html += '</div>';
         html += '<div class="job-card-row">';
         html += '<div class="job-card-meta">';
         html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Target</span><span class="job-card-meta-value mono" title="${escapeHtml(target)}">${escapeHtml(target)}</span></div>`;
-        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Schedule</span><span class="job-card-meta-value" title="${escapeHtml(job.schedule || 'Manual')}">${job.schedule ? escapeHtml(humanSchedule(job.schedule)) : 'Manual'}</span></div>`;
+        if (job.schedule) {
+          html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Schedule</span><span class="job-card-meta-value" title="${escapeHtml(job.schedule)}">${escapeHtml(humanSchedule(job.schedule))}</span></div>`;
+        }
         html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Duration</span><span class="job-card-meta-value">${duration}</span></div>`;
-        html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Next Run</span><span class="job-card-meta-value">${isDisabled ? '\u2014' : nextRun}</span></div>`;
+        if (!isDisabled && job.schedule) {
+          html += `<div class="job-card-meta-item"><span class="job-card-meta-label">Next Run</span><span class="job-card-meta-value">${nextRun}</span></div>`;
+        }
         html += '</div></div>';
         html += '<div class="job-card-footer">';
-        html += `<label class="toggle-switch toggle-btn" title="${isDisabled ? 'Enable' : 'Disable'} job"><input type="checkbox" ${isDisabled ? '' : 'checked'} onchange="toggleJob('${escapeHtml(job.id)}')"><span class="toggle-slider"></span></label>`;
         html += `<button class="btn btn-ghost btn-sm" onclick="showTestModal('${escapeHtml(job.id)}')">Test</button>`;
         html += `<button class="btn btn-ghost btn-sm" onclick="handleTrigger('${escapeHtml(job.id)}')">Trigger</button>`;
+        html += '<div style="flex:1"></div>';
         html += `<button class="btn btn-ghost btn-sm" onclick="showJobModal(${idx})">Edit</button>`;
+        if (job.schedule) {
+          html += `<button class="btn btn-ghost btn-sm" onclick="toggleJob('${escapeHtml(job.id)}')">${isDisabled ? 'Enable' : 'Disable'}</button>`;
+        }
         html += `<button class="btn btn-danger btn-sm" onclick="deleteJob(${idx})">Delete</button>`;
         html += '</div>';
         html += '</div>';
@@ -2432,14 +2524,45 @@
       el.innerHTML = html;
     }
 
-    // Render status (updates header badge only; detailed view is in the modal)
+    // Render status (updates header badges)
     function renderStatus() {
       if (!statusData) return;
+
+      // Health badge — shows preflight warnings/failures (excluding dismissed)
+      const healthBadge = document.getElementById('healthBadge');
+      const healthText = document.getElementById('healthText');
+      const dismissed = statusData.dismissedChecks || [];
+      const activeChecks = statusData.preflight.filter(c => (c.status === 'fail' || c.status === 'warn') && !dismissed.includes(c.name));
+      const hasFail = activeChecks.some(c => c.status === 'fail');
+      const hasWarn = activeChecks.length > 0;
+
+      healthBadge.style.display = '';
+      if (hasFail) {
+        healthBadge.className = 'connection-badge error';
+        healthText.textContent = String(activeChecks.length);
+        healthText.style.display = '';
+      } else if (hasWarn) {
+        healthBadge.className = 'connection-badge connecting';
+        healthText.textContent = String(activeChecks.length);
+        healthText.style.display = '';
+      } else {
+        healthBadge.className = 'connection-badge connected';
+        healthText.textContent = '';
+        healthText.style.display = 'none';
+      }
+
+      // Connection badge — Chrome status or mode
       const badge = document.getElementById('connectionBadge');
       const text = document.getElementById('statusText');
-      const hasFail = statusData.preflight.some(c => c.status === 'fail');
-      badge.className = 'connection-badge' + (hasFail ? ' error' : '');
-      text.textContent = statusData.mode + ' mode';
+
+      if (statusData.mode === 'connect') {
+        updateHeaderChromeBadge();
+      } else {
+        badge.className = 'connection-badge';
+        text.textContent = 'launch mode';
+        badge.title = 'Click for system status';
+        badge.onclick = showStatusModal;
+      }
     }
 
     // Show status details in a modal (triggered by clicking the connection badge)
@@ -2456,57 +2579,158 @@
       openModal(html);
     }
 
-    function showStatusModal() {
-      if (!statusData) return;
+    function buildStatusCheckList() {
+      if (!statusData) return '';
       const icons = { pass: '\u2713', warn: '\u26A0', fail: '\u2717' };
       const iconLabels = { pass: 'Passed', warn: 'Warning', fail: 'Failed' };
+      const dismissed = statusData.dismissedChecks || [];
 
       let body = '<ul class="check-list">';
       for (const check of statusData.preflight) {
-        body += '<li>';
+        const isDismissed = dismissed.includes(check.name);
+        body += `<li style="${isDismissed ? 'opacity:0.4' : ''}">`;
         body += `<span class="check-icon ${check.status}" aria-label="${iconLabels[check.status]}">${icons[check.status]}</span>`;
-        body += '<div>';
+        body += '<div style="flex:1;min-width:0">';
         body += `<div>${escapeHtml(check.name)}: ${escapeHtml(check.message)}</div>`;
         if (check.detail) {
           body += `<div class="check-detail"><code>${escapeHtml(check.detail)}</code></div>`;
         }
         body += '</div>';
+        body += '<div class="check-menu-wrap">';
+        body += '<button class="check-menu-btn" onclick="toggleCheckMenu(event)" title="Options">&#x22EE;</button>';
+        body += '<div class="check-menu-dropdown">';
+        body += `<button onclick="recheckSingle(this)">Recheck</button>`;
+        if (isDismissed) {
+          body += `<button onclick="restoreCheck('${escapeHtml(check.name)}')">Enable check</button>`;
+        } else {
+          body += `<button onclick="dismissCheck('${escapeHtml(check.name)}')">Disable check</button>`;
+        }
+        body += '</div></div>';
         body += '</li>';
       }
       body += '</ul>';
+      return body;
+    }
+
+    function refreshStatusModal() {
+      const container = document.getElementById('statusCheckList');
+      if (container) container.innerHTML = buildStatusCheckList();
+    }
+
+    function showStatusModal() {
+      if (!statusData) return;
 
       let html = '<div class="modal-backdrop">';
       html += '<div class="modal">';
       html += '<h3>System Status</h3>';
-      html += body;
+      html += '<div id="statusCheckList">' + buildStatusCheckList() + '</div>';
       html += '<div class="form-actions" style="justify-content:space-between;align-items:center">';
       html += '<div class="status-modal-footer">';
       html += `<span>Uptime: ${formatDuration(statusData.uptime)}</span>`;
       html += `<span class="status-footer-spacer">Mode: <span class="mono">${escapeHtml(statusData.mode)}</span></span>`;
       html += '</div>';
+      html += '<div style="display:flex;gap:8px">';
+      html += '<button class="btn btn-ghost" onclick="recheckPreflight(this)">Recheck</button>';
       html += '<button class="btn btn-ghost" onclick="closeModal(this)">Close</button>';
+      html += '</div>';
       html += '</div>';
       html += '</div></div>';
 
       openModal(html);
     }
 
+    function toggleCheckMenu(e) {
+      e.stopPropagation();
+      const dropdown = e.currentTarget.nextElementSibling;
+      // Close all other open menus
+      document.querySelectorAll('.check-menu-dropdown.open').forEach(d => {
+        if (d !== dropdown) d.classList.remove('open');
+      });
+      dropdown.classList.toggle('open');
+      // Close on outside click
+      const close = (ev) => {
+        if (!dropdown.contains(ev.target) && ev.target !== e.currentTarget) {
+          dropdown.classList.remove('open');
+          document.removeEventListener('click', close);
+        }
+      };
+      if (dropdown.classList.contains('open')) {
+        setTimeout(() => document.addEventListener('click', close), 0);
+      }
+    }
+
+    async function recheckSingle(btn) {
+      btn.textContent = 'Checking...';
+      btn.disabled = true;
+      try {
+        const results = await api('POST', '/api/preflight/recheck', {});
+        if (statusData) statusData.preflight = results;
+        renderStatus();
+        refreshStatusModal();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function recheckPreflight(btn) {
+      const origText = btn.textContent;
+      btn.textContent = 'Checking...';
+      btn.disabled = true;
+      try {
+        const results = await api('POST', '/api/preflight/recheck', {});
+        if (statusData) statusData.preflight = results;
+        renderStatus();
+        refreshStatusModal();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    }
+
+    async function dismissCheck(name) {
+      const dismissed = new Set(currentConfig.dismissedChecks || []);
+      dismissed.add(name);
+      const newConfig = JSON.parse(JSON.stringify(currentConfig));
+      newConfig.dismissedChecks = [...dismissed];
+      try {
+        await api('PUT', '/api/config', newConfig);
+        currentConfig = newConfig;
+        if (statusData) statusData.dismissedChecks = newConfig.dismissedChecks;
+        renderStatus();
+        refreshStatusModal();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function restoreCheck(name) {
+      const dismissed = new Set(currentConfig.dismissedChecks || []);
+      dismissed.delete(name);
+      const newConfig = JSON.parse(JSON.stringify(currentConfig));
+      newConfig.dismissedChecks = dismissed.size > 0 ? [...dismissed] : undefined;
+      try {
+        await api('PUT', '/api/config', newConfig);
+        currentConfig = newConfig;
+        if (statusData) statusData.dismissedChecks = newConfig.dismissedChecks || [];
+        renderStatus();
+        refreshStatusModal();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
     // Settings modal
     function showSettingsModal() {
-      const themeIcon = getTheme() === 'dark' ? '\u2600' : '\u263E';
       let html = '<div class="modal-backdrop">';
       html += '<div class="modal modal-settings">';
+      html += '<form id="settingsForm" onsubmit="saveSettings(event)">';
       html += '<div class="settings-modal-header">';
       html += '<h3>Settings</h3>';
-      html += '<div class="settings-modal-theme">';
-      html += '<span>Theme</span>';
-      html += '<button class="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light theme" onclick="toggleTheme()">' + themeIcon + '</button>';
-      html += '</div></div>';
-      html += '<form id="settingsForm" onsubmit="saveSettings(event)">';
-      html += '<div class="settings-cards" id="settingsFields"></div>';
-      html += '<div class="settings-save-bar">';
-      html += '<button type="submit" class="btn btn-primary">Save Settings</button>';
+      html += '<button type="submit" class="btn btn-primary">Save</button>';
       html += '</div>';
+      html += '<div class="settings-cards" id="settingsFields"></div>';
       html += '</form>';
       html += '</div></div>';
       openModal(html);
@@ -2540,18 +2764,26 @@
       html += '<div class="form-group"><label>Browser URL</label>';
       html += `<input type="text" id="settingBrowserURL" class="mono-input" value="${escapeHtml(currentConfig.browserURL || 'http://localhost:9222')}"></div>`;
       html += '<div class="form-group"><label>Chrome Path</label>';
-      html += `<input type="text" id="settingChromePath" class="mono-input" value="${escapeHtml(currentConfig.chromePath || '')}" placeholder="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"></div>`;
-      html += '<div class="form-group"><label>Debug Chrome</label>';
-      html += '<div class="debug-chrome-row">';
-      html += '<button type="button" class="btn btn-primary btn-sm" id="btnLaunchChrome" onclick="handleLaunchChrome()">Launch Chrome</button>';
-      html += '<button type="button" class="btn btn-danger btn-sm" id="btnStopChrome" onclick="handleStopChrome()" style="display:none">Stop Chrome</button>';
-      html += '<span id="debugChromeStatus" style="font-size:13px;color:var(--color-text-secondary)"></span>';
+      html += '<div style="display:flex;gap:8px;align-items:center">';
+      html += `<input type="text" id="settingChromePath" class="mono-input" value="${escapeHtml(currentConfig.chromePath || '')}" placeholder="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" style="flex:1">`;
+      if (window.croncast) {
+        html += '<button type="button" class="btn btn-ghost btn-sm" onclick="browseChromePath(\'settingChromePath\')" title="Browse" style="padding:6px;line-height:0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5V12a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0014 12V6.5a1.5 1.5 0 00-1.5-1.5H7.5L6 3.5H3.5A1.5 1.5 0 002 5z"/></svg></button>';
+      }
+      html += '</div></div>';
+      html += '<div class="form-group"><div style="display:flex;align-items:center;justify-content:space-between">';
+      html += '<label>Launch Chrome automatically on startup</label>';
+      html += `<button type="button" class="check-btn ${currentConfig.autoLaunchChrome ? 'on' : 'off'}" id="settingAutoLaunch" onclick="this.classList.toggle('on');this.classList.toggle('off');this.textContent=this.classList.contains('on')?'\\u2713':'\\u2717'">${currentConfig.autoLaunchChrome ? '\u2713' : '\u2717'}</button>`;
       html += '</div></div>';
       html += '</div>';
 
       html += `<div id="launchFields" style="display:${isLaunch ? 'block' : 'none'}">`;
       html += '<div class="form-group"><label>Executable Path</label>';
-      html += `<input type="text" id="settingExecPath" class="mono-input" value="${escapeHtml(currentConfig.executablePath || '')}"></div>`;
+      html += '<div style="display:flex;gap:8px;align-items:center">';
+      html += `<input type="text" id="settingExecPath" class="mono-input" value="${escapeHtml(currentConfig.executablePath || '')}" placeholder="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" style="flex:1">`;
+      if (window.croncast) {
+        html += '<button type="button" class="btn btn-ghost btn-sm" onclick="browseChromePath(\'settingExecPath\')" title="Browse" style="padding:6px;line-height:0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5V12a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0014 12V6.5a1.5 1.5 0 00-1.5-1.5H7.5L6 3.5H3.5A1.5 1.5 0 002 5z"/></svg></button>';
+      }
+      html += '</div></div>';
       html += '<div class="form-group"><label>Headless</label>';
       html += `<select id="settingHeadless">`;
       html += `<option value="false" ${!currentConfig.headless ? 'selected' : ''}>No</option>`;
@@ -2618,36 +2850,51 @@
 
       html += '</div>'; // end Viewport card
 
-      // -- Card 3: Storage --
-      html += '<div class="settings-card">';
-      html += '<div class="settings-card-header">';
-      html += '<span class="settings-icon">&#128193;</span>';
-      html += '<div><h3>Storage</h3><p>Where recordings are saved on disk</p></div>';
-      html += '</div>';
-
-      html += '<div class="form-group"><label>Output Directory</label>';
-      html += `<input type="text" id="settingOutputDir" class="mono-input" value="${escapeHtml(currentConfig.outputDir)}">`;
-      html += '</div>';
-
-      html += '</div>'; // end Storage card
-
-      // -- Card 4: Server --
+      // -- Card 3: General --
       html += '<div class="settings-card">';
       html += '<div class="settings-card-header">';
       html += '<span class="settings-icon">&#9881;</span>';
-      html += '<div><h3>Server</h3><p>Dashboard server configuration</p></div>';
+      html += '<div><h3>General</h3><p>Theme, storage, and app behavior</p></div>';
       html += '</div>';
 
-      html += '<div class="form-group"><label>Port</label>';
-      html += `<input type="number" id="settingPort" value="${currentConfig.port}">`;
-      html += '<div class="form-hint">Saved to config only. Requires a restart of croncast to take effect.</div></div>';
+      html += '<div class="form-group"><label>Output Directory</label>';
+      html += '<div style="display:flex;gap:8px;align-items:center">';
+      html += `<input type="text" id="settingOutputDir" class="mono-input" value="${escapeHtml(currentConfig.outputDir)}" style="flex:1">`;
+      if (window.croncast) {
+        html += '<button type="button" class="btn btn-ghost btn-sm" onclick="browseOutputDir()" title="Browse" style="padding:6px;line-height:0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5V12a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0014 12V6.5a1.5 1.5 0 00-1.5-1.5H7.5L6 3.5H3.5A1.5 1.5 0 002 5z"/></svg></button>';
+      }
+      html += '</div></div>';
 
-      html += '</div>'; // end Server card
+      const themeIcon = getTheme() === 'dark' ? '\u2600' : '\u263E';
+      html += '<div class="form-group"><div style="display:flex;align-items:center;justify-content:space-between">';
+      html += '<label>Theme</label>';
+      html += '<button type="button" class="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light theme" onclick="toggleTheme()">' + themeIcon + '</button>';
+      html += '</div></div>';
+
+      if (window.croncast) {
+        html += '<div class="form-group"><div style="display:flex;align-items:center;justify-content:space-between">';
+        html += '<label>Minimize to tray on close</label>';
+        html += `<button type="button" class="check-btn ${currentConfig.minimizeToTray !== false ? 'on' : 'off'}" id="settingMinimizeToTray" onclick="this.classList.toggle('on');this.classList.toggle('off');this.textContent=this.classList.contains('on')?'\\u2713':'\\u2717'">${currentConfig.minimizeToTray !== false ? '\u2713' : '\u2717'}</button>`;
+        html += '</div></div>';
+      }
+
+      html += '</div>'; // end General card
 
       el.innerHTML = html;
 
       // Fix the connect/launch display
       toggleModeFields();
+
+      // Auto-detect Chrome path for empty fields
+      if (window.croncast) {
+        window.croncast.detectChrome().then(detected => {
+          if (!detected) return;
+          const chromeEl = document.getElementById('settingChromePath');
+          if (chromeEl && !chromeEl.value) chromeEl.value = detected;
+          const execEl = document.getElementById('settingExecPath');
+          if (execEl && !execEl.value) execEl.value = detected;
+        });
+      }
     }
 
     function toggleModeFields() {
@@ -3397,6 +3644,18 @@
       });
     }
 
+    async function browseChromePath(inputId) {
+      const current = document.getElementById(inputId).value.trim();
+      const file = await window.croncast.selectFile(current || undefined);
+      if (file) document.getElementById(inputId).value = file;
+    }
+
+    async function browseOutputDir() {
+      const current = document.getElementById('settingOutputDir').value.trim();
+      const folder = await window.croncast.selectFolder(current || undefined);
+      if (folder) document.getElementById('settingOutputDir').value = folder;
+    }
+
     // Save settings
     async function saveSettings(e) {
       e.preventDefault();
@@ -3413,6 +3672,8 @@
         } else {
           delete newConfig.chromePath;
         }
+        const autoLaunch = document.getElementById('settingAutoLaunch');
+        newConfig.autoLaunchChrome = autoLaunch ? autoLaunch.classList.contains('on') : false;
         delete newConfig.executablePath;
         delete newConfig.headless;
       } else {
@@ -3422,13 +3683,17 @@
       }
 
       newConfig.outputDir = document.getElementById('settingOutputDir').value.trim();
-      newConfig.port = parseInt(document.getElementById('settingPort').value, 10);
+
+      const minimizeToTrayEl = document.getElementById('settingMinimizeToTray');
+      if (minimizeToTrayEl) {
+        newConfig.minimizeToTray = minimizeToTrayEl.classList.contains('on');
+      }
 
       try {
         await api('PUT', '/api/config', newConfig);
         currentConfig = newConfig;
         toast('Settings saved', 'success');
-        renderSettings();
+        closeModal(e.target);
       } catch (err) {
         toast(err.message, 'error');
       } finally {
@@ -3437,17 +3702,6 @@
     }
 
     // Debug Chrome
-    async function handleLaunchChrome() {
-      const chromePath = document.getElementById('settingChromePath')?.value.trim() || '';
-      try {
-        await api('POST', '/api/debug-chrome/launch', { chromePath });
-        toast('Chrome launched', 'success');
-        fetchDebugChromeStatus();
-      } catch (err) {
-        toast(err.message, 'error');
-      }
-    }
-
     async function handleStopChrome() {
       try {
         await api('POST', '/api/debug-chrome/stop');
@@ -3723,14 +3977,14 @@
     }, 1000);
 
     // Init with retry
-    async function initWithRetry(maxAttempts = 3) {
+    async function initWithRetry(maxAttempts = 5) {
       for (let i = 0; i < maxAttempts; i++) {
         try {
           await fetchAll();
           return;
         } catch {
           if (i < maxAttempts - 1) {
-            await new Promise(r => setTimeout(r, 2000 * (i + 1)));
+            await new Promise(r => setTimeout(r, 500));
           }
         }
       }

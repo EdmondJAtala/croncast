@@ -12,4 +12,8 @@ contextBridge.exposeInMainWorld('croncast', {
   windowMinimize: () => ipcRenderer.send('window-minimize'),
   windowMaximize: () => ipcRenderer.send('window-maximize'),
   windowClose: () => ipcRenderer.send('window-close'),
+  selectFile: (defaultPath) => ipcRenderer.invoke('select-file', defaultPath),
+  detectChrome: () => ipcRenderer.invoke('detect-chrome'),
+  selectFolder: (defaultPath) => ipcRenderer.invoke('select-folder', defaultPath),
+  openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
 });

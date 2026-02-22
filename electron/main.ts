@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, nativeImage } from 'electron';
 import electronUpdater from 'electron-updater';
 const { autoUpdater } = electronUpdater;
 import path from 'node:path';
@@ -84,6 +84,11 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Recheck preflight every 30 minutes (catches update pause expiry, disk changes, etc.)
+  setInterval(() => {
+    runPreflightChecks(config).catch(() => {});
+  }, 30 * 60 * 1000);
+
   // 7. Launch browser if launch mode
   if (config.executablePath) {
     const { launchBrowser } = await import('../dist/browser.js');
@@ -100,13 +105,31 @@ async function main(): Promise<void> {
   const { startScheduler, stopScheduler, stopAllRecordings, getActiveRecordings } = await import('../dist/scheduler.js');
   startScheduler(config);
 
-  // 9. Start Express server
+  // 9. Start Express server on OS-assigned port
   const { createServer } = await import('../dist/server.js');
   const { getConfigPath } = await import('../dist/config.js');
   const expressApp = createServer(config, getConfigPath());
-  const server = expressApp.listen(config.port, '127.0.0.1', () => {
-    console.log(`Web UI: http://localhost:${config.port}`);
+  const server = await new Promise<ReturnType<typeof expressApp.listen>>((resolve) => {
+    const s = expressApp.listen(0, '127.0.0.1', () => resolve(s));
   });
+  const addr = server.address();
+  const port = typeof addr === 'object' && addr ? addr.port : 0;
+  console.log(`Internal server on port ${port}`);
+
+  // 9b. Auto-launch debug Chrome in connect mode
+  const { launchDebugChrome, getDebugChromeStatus, parsePortFromURL } = await import('../dist/chrome-launcher.js');
+  if (!config.executablePath && config.chromePath && config.autoLaunchChrome) {
+    const debugPort = parsePortFromURL(config.browserURL || 'http://localhost:9222');
+    try {
+      launchDebugChrome(config.chromePath, debugPort);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if (getDebugChromeStatus().running) {
+        console.log(`Debug Chrome launched (port ${debugPort})`);
+      }
+    } catch (err) {
+      console.warn('Auto-launch Chrome failed:', err instanceof Error ? err.message : String(err));
+    }
+  }
 
   // 10. Create BrowserWindow
   const win = new BrowserWindow({
@@ -115,6 +138,7 @@ async function main(): Promise<void> {
     minWidth: 500,
     minHeight: 400,
     title: `croncast v${app.getVersion()}`,
+    icon: path.join(app.getAppPath(), 'electron', 'icon.png'),
     frame: false,
     webPreferences: {
       preload: path.join(app.getAppPath(), 'electron', 'preload.cjs'),
@@ -125,7 +149,7 @@ async function main(): Promise<void> {
 
   // Clear cached static files so dev changes take effect immediately
   await win.webContents.session.clearCache();
-  await win.loadURL(`http://127.0.0.1:${config.port}`);
+  await win.loadURL(`http://127.0.0.1:${port}`);
 
   // 11. IPC handlers
   ipcMain.on('get-version', (event) => {
@@ -142,6 +166,44 @@ async function main(): Promise<void> {
     else win.maximize();
   });
   ipcMain.on('window-close', () => win.close());
+
+  ipcMain.handle('select-file', async (_event, defaultPath?: string) => {
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openFile'],
+      defaultPath: defaultPath || undefined,
+      filters: [
+        { name: 'Executables', extensions: ['exe'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    });
+    if (result.canceled) return null;
+    return result.filePaths[0];
+  });
+
+  ipcMain.handle('detect-chrome', () => {
+    const candidates = [
+      path.join(process.env['PROGRAMFILES'] || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      path.join(process.env['PROGRAMFILES(X86)'] || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      path.join(process.env['LOCALAPPDATA'] || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    ];
+    for (const p of candidates) {
+      if (p && fs.existsSync(p)) return p;
+    }
+    return null;
+  });
+
+  ipcMain.handle('select-folder', async (_event, defaultPath?: string) => {
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory'],
+      defaultPath: defaultPath || undefined,
+    });
+    if (result.canceled) return null;
+    return result.filePaths[0];
+  });
+
+  ipcMain.handle('open-folder', async (_event, folderPath: string) => {
+    await shell.openPath(folderPath);
+  });
 
   // 12. Auto-updater
   autoUpdater.autoDownload = true;
@@ -167,7 +229,7 @@ async function main(): Promise<void> {
   }, 5000);
 
   // 13. Graceful shutdown
-  const { stopDebugChrome } = await import('../dist/chrome-launcher.js');
+  const { stopDebugChrome } = await import('../dist/chrome-launcher.js');  // already imported above but needed in shutdown scope
   const { disconnectBrowser, closeBrowser } = await import('../dist/browser.js');
 
   let isQuitting = false;
@@ -195,15 +257,42 @@ async function main(): Promise<void> {
     app.quit();
   };
 
+  // 14. System tray — minimize to tray on close
+  const trayIconPath = path.join(app.getAppPath(), 'electron', 'tray-icon.png');
+  const tray = new Tray(trayIconPath);
+  tray.setToolTip('croncast');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Show croncast', click: () => { win.show(); win.focus(); } },
+    { type: 'separator' },
+    { label: 'Quit', click: () => { shutdown(); } },
+  ]));
+  tray.on('click', () => { win.show(); win.focus(); });
+
+  // First-time tray balloon notification
+  const noticeFlagPath = path.join(userDataPath, '.tray-notice-shown');
+  let trayNoticeShown = fs.existsSync(noticeFlagPath);
+
   win.on('close', (e) => {
-    if (!isQuitting) {
+    if (!isQuitting && config.minimizeToTray !== false) {
       e.preventDefault();
-      shutdown();
+      win.hide();
+      if (!trayNoticeShown) {
+        tray.displayBalloon({
+          iconType: 'info',
+          title: 'croncast is still running',
+          content: 'The app has been minimized to the system tray. Right-click the tray icon to quit.',
+        });
+        trayNoticeShown = true;
+        fs.writeFileSync(noticeFlagPath, '');
+      }
     }
   });
 
   app.on('window-all-closed', () => {
-    if (!isQuitting) shutdown();
+    if (config.minimizeToTray === false) {
+      shutdown();
+    }
+    // else: do nothing, app stays alive in tray
   });
 }
 

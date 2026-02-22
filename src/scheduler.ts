@@ -151,9 +151,6 @@ export function triggerJob(config: AppConfig, jobId: string): { triggered: boole
     console.error(`Cannot trigger: job id "${jobId}" not found`);
     return { triggered: false, reason: 'Job not found' };
   }
-  if (job.enabled === false) {
-    return { triggered: false, reason: `Job "${job.name}" is disabled` };
-  }
   // Prevent overlap: check if this job already has an active recording
   for (const [, entry] of activeRecordings) {
     if (entry.instance.jobName === job.name) {
